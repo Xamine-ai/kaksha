@@ -3,6 +3,7 @@ export const commonZhCN = {
     you: '你',
     confirm: '确定',
     cancel: '取消',
+    stop: '停止',
     loading: '加载中...',
   },
   home: {
@@ -44,6 +45,7 @@ export const commonEnUS = {
     you: 'You',
     confirm: 'Confirm',
     cancel: 'Cancel',
+    stop: 'Stop',
     loading: 'Loading...',
   },
   home: {
@@ -85,6 +87,7 @@ export const commonHiIN = {
     you: 'आप',
     confirm: 'पुष्टि करें',
     cancel: 'रद्द करें',
+    stop: 'रोकें',
     loading: 'लोड हो रहा है...',
   },
   home: {

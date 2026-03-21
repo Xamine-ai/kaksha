@@ -6,7 +6,7 @@ import { Locale, translate, defaultLocale } from '@/lib/i18n';
 type I18nContextType = {
   locale: Locale;
   setLocale: (locale: Locale) => void;
-  t: (key: string) => string;
+  t: (key: string, params?: Record<string, string | number>) => string;
 };
 
 const LOCALE_STORAGE_KEY = 'locale';
@@ -54,7 +54,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(LOCALE_STORAGE_KEY, newLocale);
   };
 
-  const t = (key: string): string => translate(locale, key);
+  const t = (key: string, params?: Record<string, string | number>): string => translate(locale, key, params);
 
   return <I18nContext.Provider value={{ locale, setLocale, t }}>{children}</I18nContext.Provider>;
 }

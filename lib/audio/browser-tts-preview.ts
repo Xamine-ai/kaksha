@@ -2,6 +2,8 @@
 
 const VOICES_LOAD_TIMEOUT_MS = 2000;
 const PREVIEW_TIMEOUT_MS = 30000;
+const INDIC_LANG_REGEX = /[\u0900-\u097F\u0980-\u09FF\u0A00-\u0A7F\u0A80-\u0AFF\u0B00-\u0B7F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F\u0D80-\u0DFF]/;
+const CJK_LANG_REGEX = /[\u4e00-\u9fff\u3400-\u4dbf\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/;
 const CJK_LANG_THRESHOLD = 0.3;
 
 type PlayBrowserTTSPreviewOptions = {
@@ -18,9 +20,26 @@ function createAbortError(): Error {
 }
 
 function inferPreviewLang(text: string): string {
-  const cjkCount = (text.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length;
-  const ratio = text.length > 0 ? cjkCount / text.length : 0;
-  return ratio > CJK_LANG_THRESHOLD ? 'zh-CN' : 'en-US';
+  if (INDIC_LANG_REGEX.test(text)) {
+    // Handle common Indic languages
+    if (/[\u0900-\u097F]/.test(text)) return 'hi-IN'; // Hindi
+    else if (/[\u0980-\u09FF]/.test(text)) return 'bn-IN'; // Bengali
+    else if (/[\u0B80-\u0BFF]/.test(text)) return 'ta-IN'; // Tamil
+    else if (/[\u0C00-\u0C7F]/.test(text)) return 'te-IN'; // Telugu
+    else if (/[\u0C80-\u0CFF]/.test(text)) return 'kn-IN'; // Kannada
+    else if (/[\u0D00-\u0D7F]/.test(text)) return 'ml-IN'; // Malayalam
+    else if (/[\u0A80-\u0AFF]/.test(text)) return 'gu-IN'; // Gujarati
+    else if (/[\u0A00-\u0A7F]/.test(text)) return 'pa-IN'; // Punjabi
+    return 'hi-IN'; // Fallback
+  }
+
+  if (CJK_LANG_REGEX.test(text)) {
+    const cjkCount = (text.match(CJK_LANG_REGEX) || []).length;
+    const ratio = text.length > 0 ? cjkCount / text.length : 0;
+    return ratio > CJK_LANG_THRESHOLD ? 'zh-CN' : 'en-US';
+  }
+
+  return 'en-US';
 }
 
 export function isBrowserTTSAbortError(error: unknown): boolean {
@@ -96,6 +115,10 @@ export function resolveBrowserVoice(
  *   before starting a new preview.
  * - Resolves only after the utterance has started and then ended successfully.
  */
+// Keep a global reference to the active utterance to prevent garbage collection 
+// in some browsers (like Chrome) which can cause onend/onstart to never fire.
+let activeUtterance: SpeechSynthesisUtterance | null = null;
+
 export function playBrowserTTSPreview(options: PlayBrowserTTSPreviewOptions): {
   promise: Promise<void>;
   cancel: () => void;
@@ -151,6 +174,7 @@ export function playBrowserTTSPreview(options: PlayBrowserTTSPreviewOptions): {
         }
 
         const utterance = new SpeechSynthesisUtterance(options.text);
+        activeUtterance = utterance; // Prevent GC
         utterance.rate = options.rate ?? 1;
 
         const { voice, lang } = resolveBrowserVoice(voices, options.voice ?? '', options.text);
@@ -164,19 +188,22 @@ export function playBrowserTTSPreview(options: PlayBrowserTTSPreviewOptions): {
         };
 
         utterance.onend = () => {
+          activeUtterance = null;
           if (!started) {
-            settleReject(reject, new Error('Browser TTS preview ended before playback started'));
-            return;
+            // Some browsers (like Safari) might skip onstart for very short text
+            // or if the voice is already loaded. We'll allow it if onend fires.
+            console.warn('Browser TTS preview ended without onstart');
           }
           settleResolve(resolve);
         };
 
         utterance.onerror = (event) => {
+          activeUtterance = null;
           if (canceled || event.error === 'canceled' || event.error === 'interrupted') {
             settleReject(reject, createAbortError());
             return;
           }
-          settleReject(reject, new Error(event.error));
+          settleReject(reject, new Error(`TTS Error: ${event.error}`));
         };
 
         timeoutId = window.setTimeout(() => {
@@ -189,8 +216,15 @@ export function playBrowserTTSPreview(options: PlayBrowserTTSPreviewOptions): {
           settleReject(reject, createAbortError());
           return;
         }
+
+        // Standard Chrome/Safari fix: resume if stuck
+        if (synth.paused) {
+          synth.resume();
+        }
+
         synth.speak(utterance);
       } catch (error) {
+        activeUtterance = null;
         settleReject(reject, error);
       }
     };

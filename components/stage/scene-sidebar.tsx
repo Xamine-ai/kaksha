@@ -11,6 +11,8 @@ import {
   Globe,
   AlertCircle,
   RefreshCw,
+  Square,
+  Play,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThumbnailSlide } from '@/components/slide-renderer/components/ThumbnailSlide';
@@ -24,6 +26,8 @@ interface SceneSidebarProps {
   readonly onCollapseChange: (collapsed: boolean) => void;
   readonly onSceneSelect?: (sceneId: string) => void;
   readonly onRetryOutline?: (outlineId: string) => Promise<void>;
+  readonly onStopGeneration?: () => void;
+  readonly onResumeGeneration?: () => void;
 }
 
 const DEFAULT_WIDTH = 220;
@@ -35,11 +39,20 @@ export function SceneSidebar({
   onCollapseChange,
   onSceneSelect,
   onRetryOutline,
+  onStopGeneration,
+  onResumeGeneration,
 }: SceneSidebarProps) {
   const { t } = useI18n();
   const router = useRouter();
-  const { scenes, currentSceneId, setCurrentSceneId, generatingOutlines, generationStatus } =
-    useStageStore();
+  const {
+    scenes,
+    currentSceneId,
+    setCurrentSceneId,
+    generatingOutlines,
+    outlines,
+    generationStatus,
+    currentGeneratingOrder,
+  } = useStageStore();
   const failedOutlines = useStageStore.use.failedOutlines();
   const viewportSize = useCanvasStore.use.viewportSize();
   const viewportRatio = useCanvasStore.use.viewportRatio();
@@ -444,7 +457,62 @@ export function SceneSidebar({
             })()}
         </div>
 
-        {/* Spacer to push toggle button area */}
+        {/* Generation Status & Control Button */}
+        {(generationStatus === 'generating' || generationStatus === 'paused') &&
+          generatingOutlines.length > 0 &&
+          !collapsed && (
+            <div className="mx-3 mb-4 p-3 rounded-xl bg-purple-50/50 dark:bg-purple-900/10 border border-purple-100/50 dark:border-purple-800/20 backdrop-blur-sm shadow-sm transition-all duration-300 animate-in fade-in slide-in-from-bottom-2">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex flex-col">
+                  <span className="text-[10px] uppercase tracking-wider font-bold text-purple-600/70 dark:text-purple-400/70">
+                    {t('stage.generationStatus')}
+                  </span>
+                  <span className="text-xs font-bold text-purple-900 dark:text-purple-100">
+                    {generationStatus === 'paused'
+                      ? t('stage.paused')
+                      : currentGeneratingOrder > 0
+                        ? t('stage.generatingSceneXOfY', {
+                            x: scenes.length + 1,
+                            y: outlines.length,
+                          })
+                        : t('stage.generating')}
+                  </span>
+                </div>
+                {generationStatus === 'generating' ? (
+                  <button
+                    onClick={() => onStopGeneration?.()}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/40 shadow-sm border border-gray-100 dark:border-gray-700 active:scale-90 transition-all duration-200"
+                    title={t('common.stop')}
+                  >
+                    <Square className="w-3.5 h-3.5 fill-current" />
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => onResumeGeneration?.()}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center bg-purple-600 dark:bg-purple-500 text-white hover:bg-purple-700 dark:hover:bg-purple-400 shadow-sm shadow-purple-200 dark:shadow-none active:scale-90 transition-all duration-200"
+                    title={t('stage.resume')}
+                  >
+                    <Play className="w-3.5 h-3.5 ml-0.5" />
+                  </button>
+                )}
+              </div>
+              <div className="h-1.5 w-full bg-purple-100 dark:bg-purple-900/40 rounded-full overflow-hidden">
+                <div
+                  className={cn(
+                    'h-full rounded-full transition-all duration-500 ease-out',
+                    generationStatus === 'paused'
+                      ? 'bg-gray-400 dark:bg-gray-500'
+                      : 'bg-purple-500 dark:bg-purple-400',
+                  )}
+                  style={{
+                    width: `${Math.max(5, (scenes.length / outlines.length) * 100)}%`,
+                  }}
+                />
+              </div>
+            </div>
+          )}
+
+        {/* Spacer to push content */}
         <div className="mt-auto" />
       </div>
     </div>

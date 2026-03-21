@@ -37,16 +37,20 @@ import type { AudioPlayer } from '@/lib/utils/audio-player';
 import { ActionEngine } from '@/lib/action/engine';
 import { useCanvasStore } from '@/lib/store/canvas';
 import { useSettingsStore } from '@/lib/store/settings';
+import { useStageStore } from '@/lib/store/stage';
 import { createLogger } from '@/lib/logger';
 
 const log = createLogger('PlaybackEngine');
 
 /**
- * If more than 30% of characters are CJK, treat the text as Chinese.
- * Intentionally low: mixed Chinese text often contains punctuation,
- * numbers, and short Latin fragments (e.g. "AI课堂").
+ * Regex for detecting various scripts/languages.
  */
+const INDIC_LANG_REGEX = /[\u0900-\u097F\u0980-\u09FF\u0A00-\u0A7F\u0A80-\u0AFF\u0B00-\u0B7F\u0B80-\u0BFF\u0C00-\u0C7F\u0C80-\u0CFF\u0D00-\u0D7F\u0D80-\u0DFF]/;
+const CJK_LANG_REGEX = /[\u4e00-\u9fff\u3400-\u4dbf\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]/;
 const CJK_LANG_THRESHOLD = 0.3;
+
+// Keep a global reference to prevent GC during chunk playback
+let activeUtterance: SpeechSynthesisUtterance | null = null;
 
 export class PlaybackEngine {
   private scenes: Scene[] = [];
@@ -610,6 +614,7 @@ export class PlaybackEngine {
     const settings = useSettingsStore.getState();
     const chunkText = this.browserTTSChunks[this.browserTTSChunkIndex];
     const utterance = new SpeechSynthesisUtterance(chunkText);
+    activeUtterance = utterance; // Prevent GC
 
     // Apply settings
     const speed = this.callbacks.getPlaybackSpeed?.() ?? 1;
@@ -632,12 +637,32 @@ export class PlaybackEngine {
     if (!voiceFound) {
       // No usable voice configured — detect text language so the browser
       // auto-selects an appropriate voice.
-      const cjkRatio =
-        (chunkText.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length / chunkText.length;
-      utterance.lang = cjkRatio > CJK_LANG_THRESHOLD ? 'zh-CN' : 'en-US';
+      const text = chunkText;
+      const stageLanguage = useStageStore.getState().stage?.language;
+
+      if (INDIC_LANG_REGEX.test(text)) {
+        // Handle common Indic languages
+        if (/[\u0900-\u097F]/.test(text)) utterance.lang = 'hi-IN'; // Hindi
+        else if (/[\u0980-\u09FF]/.test(text)) utterance.lang = 'bn-IN'; // Bengali
+        else if (/[\u0B80-\u0BFF]/.test(text)) utterance.lang = 'ta-IN'; // Tamil
+        else if (/[\u0C00-\u0C7F]/.test(text)) utterance.lang = 'te-IN'; // Telugu
+        else if (/[\u0C80-\u0CFF]/.test(text)) utterance.lang = 'kn-IN'; // Kannada
+        else if (/[\u0D00-\u0D7F]/.test(text)) utterance.lang = 'ml-IN'; // Malayalam
+        else if (/[\u0A80-\u0AFF]/.test(text)) utterance.lang = 'gu-IN'; // Gujarati
+        else if (/[\u0A00-\u0A7F]/.test(text)) utterance.lang = 'pa-IN'; // Punjabi
+        else if (/[\u0900-\u097F]/.test(text)) utterance.lang = 'mr-IN'; // Marathi (shares Devanagari)
+        else utterance.lang = 'hi-IN'; // Fallback for other Indic
+      } else if (CJK_LANG_REGEX.test(text)) {
+        const cjkRatio = (text.match(CJK_LANG_REGEX) || []).length / text.length;
+        utterance.lang = cjkRatio > CJK_LANG_THRESHOLD ? 'zh-CN' : 'en-US';
+      } else {
+        // Fallback to stage language or English
+        utterance.lang = stageLanguage || 'en-US';
+      }
     }
 
     utterance.onend = () => {
+      activeUtterance = null;
       this.browserTTSChunkIndex++;
       if (this.mode === 'playing') {
         this.playBrowserTTSChunk(); // next chunk
@@ -645,6 +670,7 @@ export class PlaybackEngine {
     };
 
     utterance.onerror = (event) => {
+      activeUtterance = null;
       // 'canceled' is expected when stop/pause is called — not a real error
       if (event.error !== 'canceled') {
         log.warn('Browser TTS chunk error:', event.error);
@@ -660,6 +686,9 @@ export class PlaybackEngine {
     // Chrome bug workaround: cancel() before speak() to clear stale synthesis
     // state that can produce garbled/broken audio output.
     window.speechSynthesis.cancel();
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
     window.speechSynthesis.speak(utterance);
   }
 

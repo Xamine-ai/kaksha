@@ -2,7 +2,7 @@ import { defaultLocale, type Locale } from './types';
 export { type Locale, defaultLocale } from './types';
 import { settingsZhCN, settingsEnUS, settingsHiIN } from './settings';
 import { commonZhCN, commonEnUS, commonHiIN } from './common';
-import { stageZhCN, stageEnUS } from './stage';
+import { stageZhCN, stageEnUS, stageHiIN } from './stage';
 import { chatZhCN, chatEnUS } from './chat';
 import { generationZhCN, generationEnUS } from './generation';
 
@@ -23,7 +23,7 @@ export const translations: Record<Locale, any> = {
   },
   'hi-IN': {
     ...commonHiIN,
-    ...stageEnUS, // Fallback for missing major sections
+    ...stageHiIN,
     ...chatEnUS,
     ...generationEnUS,
     ...settingsHiIN,
@@ -34,7 +34,7 @@ export const translations: Record<Locale, any> = {
 
 export type TranslationKey = keyof (typeof translations)[typeof defaultLocale];
 
-export function translate(locale: Locale, key: string): string {
+export function translate(locale: Locale, key: string, params?: Record<string, string | number>): string {
   const keys = key.split('.');
   
   // Try selected locale first
@@ -51,10 +51,21 @@ export function translate(locale: Locale, key: string): string {
     }
   }
 
-  return (typeof value === 'string' ? value : undefined) ?? key;
+  if (typeof value !== 'string') {
+    return key;
+  }
+
+  // Handle simple interpolation {key}
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      value = (value as string).replace(`{${k}}`, String(v));
+    });
+  }
+
+  return value;
 }
 
-export function getClientTranslation(key: string): string {
+export function getClientTranslation(key: string, params?: Record<string, string | number>): string {
   let locale: Locale = defaultLocale;
 
   if (typeof window !== 'undefined') {
@@ -68,5 +79,5 @@ export function getClientTranslation(key: string): string {
     }
   }
 
-  return translate(locale, key);
+  return translate(locale, key, params);
 }

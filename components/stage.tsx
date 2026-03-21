@@ -39,8 +39,12 @@ import { VisuallyHidden } from 'radix-ui';
  */
 export function Stage({
   onRetryOutline,
+  onStopGeneration,
+  onResumeGeneration,
 }: {
   onRetryOutline?: (outlineId: string) => Promise<void>;
+  onStopGeneration?: () => void;
+  onResumeGeneration?: () => void;
 }) {
   const { t } = useI18n();
   const { mode, getCurrentScene, scenes, currentSceneId, setCurrentSceneId, generatingOutlines } =
@@ -528,6 +532,10 @@ export function Stage({
 
   const isTopicActive = playbackView.isTopicActive;
 
+  // Gated scene switch confirmation
+  const isPendingScene = currentSceneId === PENDING_SCENE_ID;
+  const hasNextPending = generatingOutlines.length > 0;
+
   /**
    * Gated scene switch — if a topic is active, show AlertDialog before switching.
    * Returns true if the switch was immediate, false if gated (dialog shown).
@@ -539,10 +547,16 @@ export function Stage({
         setPendingSceneId(targetSceneId);
         return false;
       }
+
+      // If switching to pending scene, check if it's already generated
+      if (targetSceneId === PENDING_SCENE_ID && !hasNextPending) {
+        return false;
+      }
+
       setCurrentSceneId(targetSceneId);
       return true;
     },
-    [currentSceneId, isTopicActive, setCurrentSceneId],
+    [currentSceneId, isTopicActive, setCurrentSceneId, hasNextPending],
   );
 
   /** User confirmed scene switch via AlertDialog */
@@ -624,8 +638,6 @@ export function Stage({
   };
 
   // get scene information
-  const isPendingScene = currentSceneId === PENDING_SCENE_ID;
-  const hasNextPending = generatingOutlines.length > 0;
   const currentSceneIndex = isPendingScene
     ? scenes.length
     : scenes.findIndex((s) => s.id === currentSceneId);
@@ -680,6 +692,8 @@ export function Stage({
         onCollapseChange={setSidebarCollapsed}
         onSceneSelect={gatedSceneSwitch}
         onRetryOutline={onRetryOutline}
+        onStopGeneration={onStopGeneration}
+        onResumeGeneration={onResumeGeneration}
       />
 
       {/* Main Content Area */}

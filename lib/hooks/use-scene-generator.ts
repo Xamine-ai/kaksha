@@ -242,7 +242,10 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
   const generateRemaining = useCallback(
     async (params: GenerationParams) => {
       lastParamsRef.current = params;
-      if (generatingRef.current) return;
+      if (generatingRef.current) {
+        log.info('Generation already in progress, ignoring call');
+        return;
+      }
       generatingRef.current = true;
       abortRef.current = false;
       const removeGeneratingOutline = (outlineId: string) => {
@@ -258,6 +261,13 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
       const state = store.getState();
       const { outlines, scenes, stage } = state;
       const startEpoch = state.generationEpoch;
+      log.info('Starting generation remaining', { 
+        stageId: stage?.id, 
+        epoch: startEpoch, 
+        outlinesCount: outlines.length,
+        scenesCount: scenes.length 
+      });
+
       if (!stage || outlines.length === 0) {
         generatingRef.current = false;
         return;
@@ -272,6 +282,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
         .sort((a, b) => a.order - b.order);
 
       if (pending.length === 0) {
+        log.info('No pending outlines to generate');
         store.getState().setGenerationStatus('completed');
         store.getState().setGeneratingOutlines([]);
         options.onComplete?.();
@@ -279,6 +290,7 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
         return;
       }
 
+      log.info('Pending outlines found:', pending.map(o => o.order));
       store.getState().setGeneratingOutlines(pending);
 
       // Launch media generation in parallel — does not block content/action generation
@@ -302,6 +314,11 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
         let pausedByFailureOrAbort = false;
         for (const outline of pending) {
           if (abortRef.current || store.getState().generationEpoch !== startEpoch) {
+            log.info('Generation aborted or epoch changed in loop start', { 
+              abort: abortRef.current, 
+              epoch: store.getState().generationEpoch, 
+              startEpoch 
+            });
             store.getState().setGenerationStatus('paused');
             pausedByFailureOrAbort = true;
             break;
@@ -425,11 +442,24 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
   generateRemainingRef.current = generateRemaining;
 
   const stop = useCallback(() => {
+    log.info('Stopping generation');
     abortRef.current = true;
     store.getState().bumpGenerationEpoch();
+    store.getState().setGenerationStatus('paused');
     fetchAbortRef.current?.abort();
     mediaAbortRef.current?.abort();
   }, [store]);
+
+  const resume = useCallback(() => {
+    const params = lastParamsRef.current;
+    if (params) {
+      log.info('Resuming generation');
+      store.getState().setGenerationStatus('generating');
+      generateRemaining(params);
+    } else {
+      log.warn('Cannot resume: no cached params');
+    }
+  }, [generateRemaining, store]);
 
   const isGenerating = useCallback(() => generatingRef.current, []);
 
@@ -531,5 +561,5 @@ export function useSceneGenerator(options: UseSceneGeneratorOptions = {}) {
     [store],
   );
 
-  return { generateRemaining, retrySingleOutline, stop, isGenerating };
+  return { generateRemaining, retrySingleOutline, stop, resume, isGenerating };
 }

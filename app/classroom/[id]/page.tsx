@@ -27,7 +27,7 @@ export default function ClassroomDetailPage() {
 
   const generationStartedRef = useRef(false);
 
-  const { generateRemaining, retrySingleOutline, stop } = useSceneGenerator({
+  const { generateRemaining, retrySingleOutline, stop, resume } = useSceneGenerator({
     onComplete: () => {
       log.info('[Classroom] All scenes generated');
     },
@@ -113,6 +113,13 @@ export default function ClassroomDetailPage() {
     const completedOrders = new Set(scenes.map((s) => s.order));
     const hasPending = outlines.some((o) => !completedOrders.has(o.order));
 
+    log.info('[Classroom] Generation check:', { 
+      hasPending, 
+      outlinesCount: outlines.length, 
+      scenesCount: scenes.length,
+      stageId: stage?.id 
+    });
+
     if (hasPending && stage) {
       generationStartedRef.current = true;
 
@@ -126,6 +133,7 @@ export default function ClassroomDetailPage() {
         .filter(Boolean);
 
       loadImageMapping(storageIds).then((imageMapping) => {
+        log.info('[Classroom] Starting generation remaining', { params });
         generateRemaining({
           pdfImages: params.pdfImages,
           imageMapping,
@@ -140,9 +148,7 @@ export default function ClassroomDetailPage() {
         });
       });
     } else if (outlines.length > 0 && stage) {
-      // All scenes are generated, but some media may not have finished.
-      // Resume media generation for any tasks not yet in IndexedDB.
-      // generateMediaForOutlines skips already-completed tasks automatically.
+      log.info('[Classroom] All scenes generated, resuming media only if needed');
       generationStartedRef.current = true;
       generateMediaForOutlines(outlines, stage.id).catch((err) => {
         log.warn('[Classroom] Media generation resume error:', err);
@@ -177,7 +183,11 @@ export default function ClassroomDetailPage() {
               </div>
             </div>
           ) : (
-            <Stage onRetryOutline={retrySingleOutline} />
+            <Stage
+              onRetryOutline={retrySingleOutline}
+              onStopGeneration={stop}
+              onResumeGeneration={resume}
+            />
           )}
         </div>
       </MediaStageProvider>
