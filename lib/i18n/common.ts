@@ -6,7 +6,7 @@ export const commonZhCN = {
     loading: '加载中...',
   },
   home: {
-    slogan: 'Kaksha - a xamine.ai product',
+    slogan: 'A xamine.ai product',
     greeting: '嗨，',
   },
   toolbar: {
@@ -47,7 +47,7 @@ export const commonEnUS = {
     loading: 'Loading...',
   },
   home: {
-    slogan: 'Kaksha - a xamine.ai product',
+    slogan: 'Your interactive classroom',
     greeting: 'Hi, ',
   },
   toolbar: {
