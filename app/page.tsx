@@ -46,6 +46,8 @@ import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useDraftCache } from '@/lib/hooks/use-draft-cache';
 import { SpeechButton } from '@/components/audio/speech-button';
+import { MobileClassroom } from '@/src/xamine-ui/MobileClassroom';
+
 
 const log = createLogger('Home');
 
@@ -1132,5 +1134,112 @@ function ClassroomCard({
 }
 
 export default function Page() {
-  return <HomePage />;
+  const [viewMode, setViewMode] = useState<'selector' | 'desktop' | 'mobile'>('selector');
+
+  // Load preference from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('viewPreference');
+    if (saved === 'desktop' || saved === 'mobile') {
+      setViewMode(saved as any);
+    }
+  }, []);
+
+  const selectView = (mode: 'selector' | 'desktop' | 'mobile') => {
+    setViewMode(mode);
+    if (mode === 'selector') {
+      localStorage.removeItem('viewPreference');
+    } else {
+      localStorage.setItem('viewPreference', mode);
+    }
+  };
+
+  if (viewMode === 'selector') {
+    return (
+      <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#020617] relative overflow-hidden">
+        {/* Background Decor */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/10 rounded-full blur-[120px]" />
+        </div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative z-10 flex flex-col items-center max-w-2xl px-6 text-center"
+        >
+          <img src="/logo-horizontal.png" alt="OpenMAIC" className="h-16 mb-8" />
+          
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white tracking-tight mb-4">
+            Welcome to Kaksha
+          </h1>
+          <p className="text-slate-400 text-lg mb-12 max-w-md">
+            Experience the future of AI-assisted learning. Select your preferred view to continue.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+            <button
+              onClick={() => selectView('desktop')}
+              className="group relative p-8 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-blue-500/50 hover:bg-slate-900/80 transition-all duration-300 text-left overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <Monitor className="w-10 h-10 text-blue-400 mb-6 group-hover:scale-110 transition-transform" />
+              <h3 className="text-xl font-bold text-white mb-2">Desktop View</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                Optimized for large screens with side-by-side controls and full context.
+              </p>
+            </button>
+
+            <button
+              onClick={() => selectView('mobile')}
+              className="group relative p-8 rounded-2xl bg-slate-900/50 border border-slate-800 hover:border-purple-500/50 hover:bg-slate-900/80 transition-all duration-300 text-left overflow-hidden"
+            >
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="size-10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                <div className="w-6 h-10 border-2 border-purple-400 rounded-md relative flex justify-center">
+                  <div className="w-3 h-0.5 bg-purple-400 rounded-full absolute top-1" />
+                  <div className="w-1.5 h-1.5 border border-purple-400 rounded-full absolute bottom-1" />
+                </div>
+              </div>
+              <h3 className="text-xl font-bold text-white mb-2">Mobile View</h3>
+              <p className="text-slate-500 text-sm leading-relaxed">
+                Modern vertical stack layout designed for hand-held learning.
+              </p>
+            </button>
+          </div>
+          
+          <div className="mt-16 text-slate-600 text-[11px] uppercase tracking-widest font-semibold flex items-center gap-2">
+            <div className="w-8 h-px bg-slate-800" />
+            Phase 0: The Mobile Morph
+            <div className="w-8 h-px bg-slate-800" />
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  if (viewMode === 'mobile') {
+    return (
+      <div className="relative">
+        <MobileClassroom />
+        <button 
+          onClick={() => selectView('selector')}
+          className="fixed bottom-4 left-4 z-[100] px-4 py-2 bg-slate-900/80 text-slate-300 text-xs rounded-full border border-slate-800 backdrop-blur-md opacity-50 hover:opacity-100 transition-all"
+        >
+          Exit Mobile Preview
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative">
+      <HomePage />
+      <button 
+        onClick={() => selectView('selector')}
+        className="fixed bottom-4 left-4 z-[100] px-4 py-2 bg-slate-900/10 text-slate-400 text-xs rounded-full border border-slate-200/50 backdrop-blur-md opacity-30 hover:opacity-100 transition-all"
+      >
+        Switch View Mode
+      </button>
+    </div>
+  );
 }
