@@ -1,9 +1,7 @@
-<!-- <p align="center">
-  <img src="assets/logo-horizontal.png" alt="OpenMAIC" width="420"/>
-</p> -->
+  <img src="public/logo-horizontal.png" alt="Kaksha" width="420"/>
 
 <p align="center">
-  <img src="assets/banner.png" alt="OpenMAIC Banner" width="680"/>
+  <img src="assets/banner.png" alt="Kaksha Banner" width="680"/>
 </p>
 
 <p align="center">
@@ -14,7 +12,7 @@
   <a href="https://jcst.ict.ac.cn/en/article/doi/10.1007/s11390-025-6000-0"><img src="https://img.shields.io/badge/Paper-JCST'26-blue?style=flat-square" alt="Paper"/></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL--3.0-blue.svg?style=flat-square" alt="License: AGPL-3.0"/></a>
   <a href="https://open.maic.chat/"><img src="https://img.shields.io/badge/Demo-Live-brightgreen?style=flat-square" alt="Live Demo"/></a>
-  <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FTHU-MAIC%2FOpenMAIC&envDescription=Configure%20at%20least%20one%20LLM%20provider%20API%20key%20(e.g.%20OPENAI_API_KEY%2C%20ANTHROPIC_API_KEY).%20All%20providers%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FTHU-MAIC%2FOpenMAIC%2Fblob%2Fmain%2F.env.example&project-name=openmaic&framework=nextjs"><img src="https://vercel.com/button" alt="Deploy with Vercel" height="20"/></a>
+  <a href="https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FXamine-ai%2Fkaksha&envDescription=Configure%20at%20least%20one%20LLM%20provider%20API%20key%20(e.g.%20OPENAI_API_KEY%2C%20ANTHROPIC_API_KEY).%20All%20providers%20are%20optional.&envLink=https%3A%2F%2Fgithub.com%2FXamine-ai%2Fkaksha%2Fblob%2Fmain%2F.env.example&project-name=kaksha&framework=nextjs"><img src="https://vercel.com/button" alt="Deploy with Vercel" height="20"/></a>
   <a href="#-openclaw-集成"><img src="https://img.shields.io/badge/OpenClaw-集成-F4511E?style=flat-square" alt="OpenClaw 集成"/></a>
   <a href="https://github.com/THU-MAIC/OpenMAIC/stargazers"><img src="https://img.shields.io/github/stars/THU-MAIC/OpenMAIC?style=flat-square" alt="Stars"/></a>
   <br/>
@@ -38,7 +36,7 @@
 
 ## 📖 项目简介
 
-**OpenMAIC**（Open Multi-Agent Interactive Classroom）是一个开源的 AI 互动课堂平台，能够将任何主题或文档转化为丰富的互动学习体验。基于多智能体协作引擎，它可以自动生成演示幻灯片、测验、交互式模拟实验和项目制学习活动——由 AI 教师和 AI 同学进行语音讲解、白板绘图，并与你展开实时讨论。内置 [OpenClaw](https://github.com/openclaw/openclaw) 集成，你还可以直接在飞书、Slack、Telegram 等聊天应用中生成课堂。
+**Kaksha**（Open Multi-Agent Interactive Classroom）是一个开源的 AI 互动课堂平台，能够将任何主题或文档转化为丰富的互动学习体验。基于多智能体协作引擎，它可以自动生成演示幻灯片、测验、交互式模拟实验和项目制学习活动——由 AI 教师和 AI 同学进行语音讲解、白板绘图，并与你展开实时讨论。内置 [OpenClaw](https://github.com/openclaw/openclaw) 集成，你还可以直接在飞书、Slack、Telegram 等聊天应用中生成课堂。
 
 https://github.com/user-attachments/assets/dbd013f6-9fab-43c5-a788-b47126cff7a8
 
@@ -58,7 +56,7 @@ https://github.com/user-attachments/assets/dbd013f6-9fab-43c5-a788-b47126cff7a8
 >
 > 通过 [OpenClaw](https://github.com/openclaw/openclaw)，你可以直接在飞书、Slack、Discord、Telegram 等 20+ 聊天应用中生成课堂。
 >
-> 1. `clawhub install openmaic`，或者直接跟你的 Claw 说 *"安装 OpenMAIC skill"*
+> 1. `clawhub install kaksha`，或者直接跟你的 Claw 说 *"安装 Kaksha skill"*
 > 2. 选一种模式：
 >    - **托管模式** — 在 [open.maic.chat](https://open.maic.chat/) 获取访问码，无需本地部署
 >    - **本地部署** — Skill 会引导你逐步完成 clone、配置和启动
@@ -113,7 +111,7 @@ providers:
 
 > **推荐模型：** **Gemini 3 Flash** — 效果与速度的最佳平衡。追求最高质量可选 **Gemini 3.1 Pro**（速度较慢）。
 >
-> 如果希望 OpenMAIC 服务端默认走 Gemini，还需要额外设置 `DEFAULT_MODEL=google:gemini-3-flash-preview`。
+> 如果希望 Kaksha 服务端默认走 Gemini，还需要额外设置 `DEFAULT_MODEL=google:gemini-3-flash-preview`。
 
 ### 3. 启动
 
@@ -160,7 +158,7 @@ docker compose up --build
 
 ### 课堂生成
 
-描述你想学习的内容，或附上参考材料。OpenMAIC 的两阶段流水线自动完成剩余工作：
+描述你想学习的内容，或附上参考材料。Kaksha 的两阶段流水线自动完成剩余工作：
 
 | 阶段 | 说明 |
 |------|------|
@@ -241,7 +239,7 @@ AI 老师配合聚光灯和激光笔动作进行语音讲解——如同真实�
 <tr>
 <td valign="top">
 
-OpenMAIC 集成了 [OpenClaw](https://github.com/openclaw/openclaw)——一个连接你日常使用的消息平台（飞书、Slack、Discord、Telegram、WhatsApp 等）的个人 AI 助手。通过这个集成，你可以**直接在聊天应用中生成和查看互动课堂**，无需碰命令行。
+Kaksha 集成了 [OpenClaw](https://github.com/openclaw/openclaw)——一个连接你日常使用的消息平台（飞书、Slack、Discord、Telegram、WhatsApp 等）的个人 AI 助手。通过这个集成，你可以**直接在聊天应用中生成和查看互动课堂**，无需碰命令行。
 
 </td>
 <td width="360" valign="top">
@@ -265,7 +263,7 @@ OpenMAIC 集成了 [OpenClaw](https://github.com/openclaw/openclaw)——一个�
 **已上架 ClawHub** — 一行命令安装：
 
 ```bash
-clawhub install openmaic
+clawhub install kaksha
 ```
 
 或手动复制：
@@ -293,12 +291,12 @@ cp -R /path/to/OpenMAIC/skills/openmaic ~/.openclaw/skills/openmaic
 {
   "skills": {
     "entries": {
-      "openmaic": {
+      "kaksha": {
         "config": {
           // 托管模式：粘贴从 open.maic.chat 获取的访问码
           "accessCode": "sk-xxx",
           // 本地部署模式：本地仓库路径和地址
-          "repoDir": "/path/to/OpenMAIC",
+          "repoDir": "/path/to/Kaksha",
           "url": "http://localhost:3000"
         }
       }
@@ -321,7 +319,7 @@ cp -R /path/to/OpenMAIC/skills/openmaic ~/.openclaw/skills/openmaic
 - **语音合成（TTS）** — 多种语音服务商，支持自定义音色
 - **语音识别** — 通过麦克风与 AI 老师对话
 - **网络搜索** — 智能体在课堂中搜索网络获取最新信息
-- **国际化** — 界面支持中文和英文
+- **国际化** — 界面支持印度语（印地语）、中文和英文
 - **暗色模式** — 深夜学习更护眼
 
 ---
@@ -372,7 +370,7 @@ cp -R /path/to/OpenMAIC/skills/openmaic ~/.openclaw/skills/openmaic
 ### 项目结构
 
 ```
-OpenMAIC/
+Kaksha/
 ├── app/                        # Next.js App Router
 │   ├── api/                    #   服务端 API 路由（约 18 个端点）
 │   │   ├── generate/           #     场景生成流水线（大纲、内容、图片、TTS…）
@@ -417,7 +415,7 @@ OpenMAIC/
 │   └── mathml2omml/            #   MathML → Office Math 转换
 │
 ├── skills/                     # OpenClaw / ClawHub skills
-│   └── openmaic/               #   OpenMAIC 引导式 SOP skill
+│   └── kaksha/                 #   Kaksha 引导式 SOP skill
 │       ├── SKILL.md            #   轻量路由层 + 确认规则
 │       └── references/         #   按需加载的 SOP 分段
 │
@@ -450,7 +448,7 @@ OpenMAIC/
 
 ## 📝 引用
 
-如果 OpenMAIC 对您的研究有帮助，请考虑引用：
+如果 Kaksha 对您的研究有帮助，请考虑引用：
 
 ```bibtex
 @Article{JCST-2509-16000,

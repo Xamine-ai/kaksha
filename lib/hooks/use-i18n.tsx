@@ -10,7 +10,9 @@ type I18nContextType = {
 };
 
 const LOCALE_STORAGE_KEY = 'locale';
-const VALID_LOCALES: Locale[] = ['zh-CN', 'en-US'];
+const VALID_LOCALES: Locale[] = [
+  'zh-CN', 'en-US', 'hi-IN', 'bn-IN', 'te-IN', 'mr-IN', 'ta-IN', 'ur-IN', 'kn-IN', 'gu-IN', 'ml-IN', 'or-IN', 'pa-IN'
+];
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
@@ -26,9 +28,21 @@ export function I18nProvider({ children }: { children: ReactNode }) {
         setLocaleState(stored as Locale);
         return;
       }
-      const detected = navigator.language?.startsWith('zh') ? 'zh-CN' : 'en-US';
+      const browserLang = navigator.language;
+      const detected = browserLang?.startsWith('zh') ? 'zh-CN' : 
+                       browserLang?.startsWith('hi') ? 'hi-IN' :
+                       browserLang?.startsWith('bn') ? 'bn-IN' :
+                       browserLang?.startsWith('te') ? 'te-IN' :
+                       browserLang?.startsWith('mr') ? 'mr-IN' :
+                       browserLang?.startsWith('ta') ? 'ta-IN' :
+                       browserLang?.startsWith('ur') ? 'ur-IN' :
+                       browserLang?.startsWith('kn') ? 'kn-IN' :
+                       browserLang?.startsWith('gu') ? 'gu-IN' :
+                       browserLang?.startsWith('ml') ? 'ml-IN' :
+                       browserLang?.startsWith('or') ? 'or-IN' :
+                       browserLang?.startsWith('pa') ? 'pa-IN' : 'en-US';
       localStorage.setItem(LOCALE_STORAGE_KEY, detected);
-      setLocaleState(detected);
+      setLocaleState(detected as Locale);
     } catch {
       // localStorage unavailable, keep default
     }

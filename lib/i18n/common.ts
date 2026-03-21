@@ -6,7 +6,7 @@ export const commonZhCN = {
     loading: '加载中...',
   },
   home: {
-    slogan: 'Generative Learning in Multi-Agent Interactive Classroom',
+    slogan: 'Kaksha - a xamine.ai product',
     greeting: '嗨，',
   },
   toolbar: {
@@ -47,7 +47,7 @@ export const commonEnUS = {
     loading: 'Loading...',
   },
   home: {
-    slogan: 'Generative Learning in Multi-Agent Interactive Classroom',
+    slogan: 'Kaksha - a xamine.ai product',
     greeting: 'Hi, ',
   },
   toolbar: {
@@ -77,5 +77,46 @@ export const commonEnUS = {
     exporting: 'Exporting...',
     exportSuccess: 'Export successful',
     exportFailed: 'Export failed',
+  },
+} as const;
+
+export const commonHiIN = {
+  common: {
+    you: 'आप',
+    confirm: 'पुष्टि करें',
+    cancel: 'रद्द करें',
+    loading: 'लोड हो रहा है...',
+  },
+  home: {
+    slogan: 'Kaksha - a xamine.ai product',
+    greeting: 'नमस्ते, ',
+  },
+  toolbar: {
+    languageHint: 'कोर्स इसी भाषा में जनरेट किया जाएगा',
+    pdfParser: 'पार्सर',
+    pdfUpload: 'PDF अपलोड करें',
+    removePdf: 'फ़ाइल हटाएँ',
+    webSearchOn: 'सक्षम',
+    webSearchOff: 'सक्षम करने के लिए क्लिक करें',
+    webSearchDesc: 'जनरेशन से पहले अपडेटेड जानकारी के लिए वेब सर्च करें',
+    webSearchProvider: 'सर्च इंजन',
+    webSearchNoProvider: 'सेटिंग्स में सर्च API की कॉन्फ़िगर करें',
+    selectProvider: 'प्रदाता चुनें',
+    configureProvider: 'मॉडल सेट करें',
+    configureProviderHint: 'कोर्स जनरेट करने के लिए कम से कम एक मॉडल प्रदाता कॉन्फ़िगर करें',
+    enterClassroom: 'क्लासरूम में प्रवेश करें',
+    advancedSettings: 'उन्नत सेटिंग्स',
+    ttsTitle: 'टेक्स्ट-टू-स्पीच',
+    ttsHint: 'AI टीचर के लिए आवाज चुनें',
+    ttsPreview: 'पूर्वावलोकन',
+    ttsPreviewing: 'बज रहा है...',
+  },
+  export: {
+    pptx: 'PPTX एक्सपोर्ट करें',
+    resourcePack: 'रिसोर्स पैक एक्सपोर्ट करें',
+    resourcePackDesc: 'PPTX + इंटरएक्टिव पेज',
+    exporting: 'एक्सपोर्ट हो रहा है...',
+    exportSuccess: 'एक्सपोर्ट सफल रहा',
+    exportFailed: 'एक्सपोर्ट विफल रहा',
   },
 } as const;

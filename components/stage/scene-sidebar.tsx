@@ -126,7 +126,10 @@ export function SceneSidebar({
             className="flex items-center gap-2 cursor-pointer rounded-lg px-1.5 -mx-1.5 py-1 -my-1 hover:bg-gray-100/80 dark:hover:bg-gray-800/60 active:scale-[0.97] transition-all duration-150"
             title={t('generation.backToHome')}
           >
-            <img src="/logo-horizontal.png" alt="OpenMAIC" className="h-6" />
+            <div className="flex flex-col">
+              <img src="/logo-horizontal.png" alt="Kaksha" className="h-6" />
+              <span className="text-[10px] font-bold text-muted-foreground/40 tracking-tight -mt-0.5 px-0.5">by xamine.ai</span>
+            </div>
           </button>
           <button
             onClick={() => onCollapseChange(true)}

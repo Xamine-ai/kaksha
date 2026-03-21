@@ -22,6 +22,8 @@ import type { LanguageModel } from 'ai';
 import type { StageStore } from '@/lib/api/stage-api';
 import { createStageAPI } from '@/lib/api/stage-api';
 import { generatePBLContent } from '@/lib/pbl/generate-pbl';
+import { Locale } from '@/lib/i18n';
+import { LOCALE_PROMPT_NAMES } from '@/lib/i18n/names';
 import { buildPrompt, PROMPT_IDS } from './prompts';
 import { postProcessInteractiveHtml } from './interactive-post-processor';
 import { parseActionsFromStructuredOutput } from './action-parser';
@@ -467,10 +469,13 @@ async function generateSlideContent(
   generatedMediaMapping?: ImageMapping,
   agents?: AgentInfo[],
 ): Promise<GeneratedSlideContent | null> {
-  const lang = outline.language || 'zh-CN';
+  const lang = (outline.language || 'en-US') as Locale;
+  const promptLangName = LOCALE_PROMPT_NAMES[lang] || lang;
 
   // Build assigned images description for the prompt
-  let assignedImagesText = '无可用图片，禁止插入任何 image 元素';
+  let assignedImagesText = lang === 'zh-CN' ? '无可用图片，禁止插入任何 image 元素' : 
+                          lang === 'hi-IN' ? 'कोई चित्र उपलब्ध नहीं है, किसी भी छवि तत्व को शामिल न करें' :
+                          `No images available for ${promptLangName}. Do NOT include any image elements.`;
   let visionImages: Array<{ id: string; src: string }> | undefined;
 
   if (assignedImages && assignedImages.length > 0) {
@@ -735,7 +740,7 @@ function normalizeQuizAnswer(question: Record<string, unknown>): string[] | unde
 async function generateInteractiveContent(
   outline: SceneOutline,
   aiCall: AICallFn,
-  language: 'zh-CN' | 'en-US' = 'zh-CN',
+  language: Locale = 'en-US',
 ): Promise<GeneratedInteractiveContent | null> {
   const config = outline.interactiveConfig!;
 
@@ -1041,7 +1046,11 @@ function generateDefaultPBLActions(_outline: SceneOutline): Action[] {
       id: `action_${nanoid(8)}`,
       type: 'speech',
       title: 'PBL 项目介绍',
-      text: '现在让我们开始一个项目式学习活动。请选择你的角色，查看任务看板，开始协作完成项目。',
+      text: _outline.language === 'zh-CN' 
+        ? '现在让我们开始一个项目式学习活动。请选择你的角色，查看任务看板，开始协作完成项目。' 
+        : _outline.language === 'hi-IN'
+        ? 'आइए अब एक प्रोजेक्ट-आधारित शिक्षण गतिविधि शुरू करें। अपनी भूमिका चुनें, समस्या बोर्ड देखें और प्रोजेक्ट को पूरा करने के लिए सहयोग शुरू करें।'
+        : 'Now, let us start a project-based learning activity. Please select your role, view the issue board, and begin collaborating to complete the project.',
     },
   ];
 }

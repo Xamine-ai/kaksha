@@ -15,14 +15,18 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Loader2, Trash2, AlertTriangle } from 'lucide-react';
 import { useI18n } from '@/lib/hooks/use-i18n';
+import { LOCALE_NAMES } from '@/lib/i18n/names';
+import { Locale } from '@/lib/i18n';
 import { clearDatabase } from '@/lib/utils/database';
+import { Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import { createLogger } from '@/lib/logger';
+import { cn } from '@/lib/utils';
 
 const log = createLogger('GeneralSettings');
 
 export function GeneralSettings() {
-  const { t } = useI18n();
+  const { t, locale, setLocale } = useI18n();
 
   // Clear cache state
   const [showClearDialog, setShowClearDialog] = useState(false);
@@ -62,7 +66,40 @@ export function GeneralSettings() {
       : t('settings.clearCacheConfirmItems').split(', ');
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col gap-10">
+      {/* Language Selection */}
+      <div className="space-y-4">
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 rounded-md bg-primary/10 text-primary">
+            <Globe className="w-4 h-4" />
+          </div>
+          <h3 className="text-sm font-semibold">{t('settings.language')}</h3>
+        </div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {(Object.entries(LOCALE_NAMES) as [Locale, string][]).map(([code, name]) => (
+            <Button
+              key={code}
+              variant={locale === code ? 'default' : 'outline'}
+              size="sm"
+              className={cn(
+                "justify-start h-10 px-3 transition-all",
+                locale === code ? "shadow-md scale-[1.02]" : "hover:bg-primary/5"
+              )}
+              onClick={() => setLocale(code)}
+            >
+              <span className="truncate">{name}</span>
+              {locale === code && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-foreground" />}
+            </Button>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {t('settings.languageDesc')}
+        </p>
+      </div>
+
+      <div className="h-px bg-border/60" />
+
       {/* Danger Zone - Clear Cache */}
       <div className="relative rounded-xl border border-destructive/30 bg-destructive/[0.03] dark:bg-destructive/[0.06] overflow-hidden">
         {/* Subtle diagonal stripe pattern for danger emphasis */}

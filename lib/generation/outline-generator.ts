@@ -11,6 +11,8 @@ import type {
   PdfImage,
   ImageMapping,
 } from '@/lib/types/generation';
+import { Locale } from '@/lib/i18n';
+import { LOCALE_PROMPT_NAMES } from '@/lib/i18n/names';
 import { buildPrompt, PROMPT_IDS } from './prompts';
 import { formatImageDescription, formatImagePlaceholder } from './prompt-formatters';
 import { parseJsonResponse } from './json-repair';
@@ -39,8 +41,10 @@ export async function generateSceneOutlinesFromRequirements(
   },
 ): Promise<GenerationResult<SceneOutline[]>> {
   // Build available images description for the prompt
-  let availableImagesText =
-    requirements.language === 'zh-CN' ? '无可用图片' : 'No images available';
+  const promptLangName = LOCALE_PROMPT_NAMES[requirements.language as Locale] || requirements.language;
+  let availableImagesText = requirements.language === 'zh-CN' ? '无可用图片' : 
+                          requirements.language === 'hi-IN' ? 'कोई चित्र उपलब्ध नहीं है' :
+                          `No images available for ${promptLangName}`;
   let visionImages: Array<{ id: string; src: string }> | undefined;
 
   if (pdfImages && pdfImages.length > 0) {
@@ -103,7 +107,7 @@ export async function generateSceneOutlinesFromRequirements(
       ? pdfText.substring(0, MAX_PDF_CONTENT_CHARS)
       : requirements.language === 'zh-CN'
         ? '无'
-        : 'None',
+        : requirements.language === 'hi-IN' ? 'कुछ नहीं' : 'None',
     availableImages: availableImagesText,
     userProfile: userProfileText,
     mediaGenerationPolicy,
@@ -137,11 +141,16 @@ export async function generateSceneOutlinesFromRequirements(
       };
     }
     // Ensure IDs, order, and language
+    // Ensure IDs, order, and language
     const enriched = outlines.map((outline, index) => ({
       ...outline,
       id: outline.id || nanoid(),
       order: index + 1,
       language: requirements.language,
+      // Pass the same language down to pblConfig if it's a PBL scene
+      pblConfig: outline.type === 'pbl' && outline.pblConfig 
+        ? { ...outline.pblConfig, language: requirements.language }
+        : outline.pblConfig
     }));
 
     // Replace sequential gen_img_N/gen_vid_N with globally unique IDs

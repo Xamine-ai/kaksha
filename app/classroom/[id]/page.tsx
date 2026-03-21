@@ -12,7 +12,6 @@ import { useWhiteboardHistoryStore } from '@/lib/store/whiteboard-history';
 import { createLogger } from '@/lib/logger';
 import { MediaStageProvider } from '@/lib/contexts/media-stage-context';
 import { generateMediaForOutlines } from '@/lib/media/media-orchestrator';
-import { MobileClassroom } from '@/src/xamine-ui/MobileClassroom';
 
 
 const log = createLogger('Classroom');
@@ -34,12 +33,6 @@ export default function ClassroomDetailPage() {
     },
   });
 
-  const [viewPreference, setViewPreference] = useState<'desktop' | 'mobile'>('desktop');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('viewPreference');
-    if (saved === 'mobile') setViewPreference('mobile');
-  }, []);
 
   const loadClassroom = useCallback(async () => {
     try {
@@ -183,8 +176,6 @@ export default function ClassroomDetailPage() {
                 </button>
               </div>
             </div>
-          ) : viewPreference === 'mobile' ? (
-            <MobileClassroom onRetryOutline={retrySingleOutline} />
           ) : (
             <Stage onRetryOutline={retrySingleOutline} />
           )}

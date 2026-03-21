@@ -79,11 +79,15 @@ export function formatImageDescription(img: PdfImage, language: string): string 
   let dimInfo = '';
   if (img.width && img.height) {
     const ratio = (img.width / img.height).toFixed(2);
-    dimInfo = ` | 尺寸: ${img.width}×${img.height} (宽高比${ratio})`;
+    dimInfo = language === 'zh-CN' ? ` | 尺寸: ${img.width}×${img.height} (宽高比${ratio})` : 
+              language === 'hi-IN' ? ` | आकार: ${img.width}×${img.height} (पक्ष अनुपात ${ratio})` :
+              ` | size: ${img.width}×${img.height} (ratio ${ratio})`;
   }
   const desc = img.description ? ` | ${img.description}` : '';
   return language === 'zh-CN'
     ? `- **${img.id}**: 来自PDF第${img.pageNumber}页${dimInfo}${desc}`
+    : language === 'hi-IN'
+    ? `- **${img.id}**: PDF पृष्ठ ${img.pageNumber} से${dimInfo}${desc}`
     : `- **${img.id}**: from PDF page ${img.pageNumber}${dimInfo}${desc}`;
 }
 
@@ -95,10 +99,14 @@ export function formatImagePlaceholder(img: PdfImage, language: string): string 
   let dimInfo = '';
   if (img.width && img.height) {
     const ratio = (img.width / img.height).toFixed(2);
-    dimInfo = ` | 尺寸: ${img.width}×${img.height} (宽高比${ratio})`;
+    dimInfo = language === 'zh-CN' ? ` | 尺寸: ${img.width}×${img.height} (宽高比${ratio})` : 
+              language === 'hi-IN' ? ` | आकार: ${img.width}×${img.height} (पक्ष अनुपात ${ratio})` :
+              ` | size: ${img.width}×${img.height} (ratio ${ratio})`;
   }
   return language === 'zh-CN'
     ? `- **${img.id}**: PDF第${img.pageNumber}页的图片${dimInfo} [参见附图]`
+    : language === 'hi-IN'
+    ? `- **${img.id}**: PDF पृष्ठ ${img.pageNumber} से छवि${dimInfo} [संलग्न देखें]`
     : `- **${img.id}**: image from PDF page ${img.pageNumber}${dimInfo} [see attached]`;
 }
 

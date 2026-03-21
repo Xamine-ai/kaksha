@@ -1169,3 +1169,40 @@ export const settingsEnUS = {
     language: 'Language',
   },
 } as const;
+
+export const settingsHiIN = {
+  settings: {
+    title: 'सेटिंग्स',
+    description: 'एप्लीकेशन सेटिंग्स कॉन्फ़िगर करें',
+    language: 'भाषा',
+    languageDesc: 'इंटरफेस की भाषा चुनें',
+    theme: 'थीम',
+    themeDesc: 'थीम मोड चुनें (हल्का/गहरा/सिस्टम)',
+    themeOptions: {
+      light: 'हल्का',
+      dark: 'गहरा',
+      system: 'सिस्टम',
+    },
+    apiKey: 'API कुंजी',
+    apiKeyDesc: 'अपनी API कुंजी कॉन्फ़िगर करें',
+    apiBaseUrl: 'API एंडपॉइंट एड्रेस',
+    model: 'मॉडल कॉन्फ़िगरेशन',
+    close: 'बंद करें',
+    save: 'सहेजें',
+    providers: 'भाषा मॉडल',
+    generalSettings: 'सामान्य सेटिंग्स',
+    systemSettings: 'सिस्टम सेटिंग्स',
+    ttsSettings: 'टेक्स्ट-टू-स्पीच',
+    asrSettings: 'वॉइस रिकॉग्निशन',
+    dangerZone: 'खतरनाक क्षेत्र',
+    clearCache: 'कैश साफ करें',
+    clearCacheDescription: 'सभी स्थानीय डेटा हटा दें। इसे वापस नहीं लिया जा सकता।',
+    clearCacheConfirmPhrase: 'पुष्टि करें',
+    saveSuccess: 'सेटिंग्स सहेजी गईं',
+    saveFailed: 'सहेजने में विफल',
+  },
+  profile: {
+    title: 'प्रोफ़ाइल',
+    defaultNickname: 'छात्र',
+  }
+} as const;

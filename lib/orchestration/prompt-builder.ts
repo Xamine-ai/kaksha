@@ -8,6 +8,8 @@ import type { StatelessChatRequest } from '@/lib/types/chat';
 import type { AgentConfig } from '@/lib/orchestration/registry/types';
 import type { WhiteboardActionRecord, AgentTurnSummary } from './director-prompt';
 import { getActionDescriptions, getEffectiveActions } from './tool-schemas';
+import { type Locale } from '@/lib/i18n';
+import { LOCALE_PROMPT_NAMES } from '@/lib/i18n/names';
 
 // ==================== Role Guidelines ====================
 
@@ -164,9 +166,10 @@ Personalize your teaching based on their background when relevant. Address them 
   const roleGuideline = ROLE_GUIDELINES[agentConfig.role] || ROLE_GUIDELINES.student;
 
   // Build language constraint from stage language
-  const courseLanguage = storeState.stage?.language;
+  const courseLanguage = storeState.stage?.language as Locale;
+  const promptLangName = LOCALE_PROMPT_NAMES[courseLanguage] || courseLanguage;
   const languageConstraint = courseLanguage
-    ? `\n# Language (CRITICAL)\nYou MUST speak in ${courseLanguage === 'zh-CN' ? 'Chinese (Simplified)' : courseLanguage === 'en-US' ? 'English' : courseLanguage}. ALL text content in your response MUST be in this language.\n`
+    ? `\n# Language (CRITICAL)\nYou MUST speak in ${promptLangName}. ALL text content in your response MUST be in this language.\n`
     : '';
 
   return `# Role
