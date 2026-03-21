@@ -387,7 +387,7 @@ export function Roundtable({
   }, [playbackSpeed, setPlaybackSpeed]);
 
   return (
-    <div className="h-[192px] w-full flex flex-col relative z-10 border-t border-gray-100 dark:border-gray-800 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md">
+    <div className="h-[192px] w-full flex flex-col relative z-10 glass rounded-2xl mx-3 mb-3 shrink-0">
       {/* ── Toolbar strip — merged from CanvasArea ── */}
       <CanvasToolbar
         className="shrink-0 h-8 px-3 border-b border-gray-100/40 dark:border-gray-700/30"
@@ -586,7 +586,7 @@ export function Roundtable({
                 if (isRecording) stopRecording();
               }
             }}
-            className="relative w-full h-full rounded-[2.5rem] bg-gradient-to-b from-white/40 to-white/80 dark:from-gray-800/40 dark:to-gray-800/80 backdrop-blur-xl border border-white/50 dark:border-gray-700/50 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05),inset_0_1px_0_0_rgba(255,255,255,0.9)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] flex flex-col justify-center px-6 overflow-hidden group transition-all duration-700 cursor-default"
+            className="relative w-full h-full glass rounded-[2.5rem] flex flex-col justify-center px-6 overflow-hidden group transition-all duration-700 cursor-default shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)]"
           >
             {/* Text input box */}
             <AnimatePresence>

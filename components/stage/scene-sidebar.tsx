@@ -119,7 +119,7 @@ export function SceneSidebar({
         width: displayWidth,
         transition: isDraggingRef.current ? 'none' : 'width 0.3s ease',
       }}
-      className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-r border-gray-100 dark:border-gray-800 shadow-[2px_0_24px_rgba(0,0,0,0.02)] flex flex-col shrink-0 z-20 relative overflow-visible"
+      className="glass rounded-2xl m-3 flex flex-col shrink-0 z-20 relative overflow-visible shadow-[0_8px_32px_0_rgba(31,38,135,0.07)]"
     >
       {/* Drag handle */}
       {!collapsed && (

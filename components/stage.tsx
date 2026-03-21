@@ -685,7 +685,7 @@ export function Stage({
   })();
 
   return (
-    <div className="flex-1 flex overflow-hidden bg-gray-50 dark:bg-gray-900">
+    <div className="flex-1 flex overflow-hidden bg-transparent p-1">
       {/* Scene Sidebar */}
       <SceneSidebar
         collapsed={sidebarCollapsed}
@@ -697,13 +697,13 @@ export function Stage({
       />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0 relative">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0 relative gap-3 p-2">
         {/* Header */}
         <Header currentSceneTitle={currentScene?.title || ''} />
 
         {/* Canvas Area */}
         <div
-          className="overflow-hidden relative flex-1 min-h-0 isolate"
+          className="overflow-hidden relative flex-1 min-h-0 isolate glass rounded-2xl"
           style={{
             height: sceneViewerHeight,
           }}
