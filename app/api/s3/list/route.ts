@@ -8,8 +8,9 @@ export async function GET() {
       list.map(async (item) => {
         if (!item.Key) return null;
         try {
-          const content = await getFromS3(item.Key);
-          if (!content) return null;
+          const result = await getFromS3(item.Key);
+          if (!result || !result.body) return null;
+          const content = await (result.body as any).transformToString();
           const data = JSON.parse(content);
           return {
             id: data.id || data.stage?.id,

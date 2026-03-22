@@ -11,12 +11,13 @@ export async function GET(req: NextRequest) {
     }
 
     const key = `projects/${id}.json`;
-    const content = await getFromS3(key);
+    const result = await getFromS3(key);
 
-    if (!content) {
+    if (!result || !result.body) {
       return NextResponse.json({ error: 'Project not found' }, { status: 404 });
     }
 
+    const content = await result.body.transformToString();
     const data = JSON.parse(content);
     return NextResponse.json({ project: data });
   } catch (error) {
