@@ -49,6 +49,7 @@ import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useDraftCache } from '@/lib/hooks/use-draft-cache';
 import { SpeechButton } from '@/components/audio/speech-button';
+import { AuroraBackground } from '@/components/ui/aurora-background';
 const log = createLogger('Home');
 
 const WEB_SEARCH_STORAGE_KEY = 'webSearchEnabled';
@@ -332,7 +333,7 @@ function HomePage() {
   };
 
   return (
-    <div className="min-h-[100dvh] w-full bg-transparent flex flex-col items-center p-4 pt-16 md:p-8 md:pt-16 overflow-x-hidden">
+    <AuroraBackground className="min-h-[100dvh] w-full flex flex-col items-center p-4 pt-36 md:p-8 md:pt-40 overflow-x-hidden">
       {/* ═══ Top-right pill (unchanged) ═══ */}
       <div
         ref={toolbarRef}
@@ -367,7 +368,7 @@ function HomePage() {
                         setLanguageOpen(false);
                       }}
                       className={cn(
-                        'w-full px-4 py-2.5 text-left text-[13px] hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-between gap-3',
+                        'w-full px-4 py-2.5 text-left text-[13px] text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-between gap-3',
                         locale === code && 'bg-primary/5 text-primary font-semibold'
                       )}
                     >
@@ -404,9 +405,9 @@ function HomePage() {
                   setThemeOpen(false);
                 }}
                 className={cn(
-                  'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
+                  'w-full px-4 py-2 text-left text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
                   theme === 'light' &&
-                    'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
+                  'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
                 )}
               >
                 <Sun className="w-4 h-4" />
@@ -418,9 +419,9 @@ function HomePage() {
                   setThemeOpen(false);
                 }}
                 className={cn(
-                  'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
+                  'w-full px-4 py-2 text-left text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
                   theme === 'dark' &&
-                    'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
+                  'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
                 )}
               >
                 <Moon className="w-4 h-4" />
@@ -432,9 +433,9 @@ function HomePage() {
                   setThemeOpen(false);
                 }}
                 className={cn(
-                  'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
+                  'w-full px-4 py-2 text-left text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
                   theme === 'system' &&
-                    'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
+                  'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
                 )}
               >
                 <Monitor className="w-4 h-4" />
@@ -498,7 +499,7 @@ function HomePage() {
         transition={{ duration: 0.6, ease: 'easeOut' }}
         className={cn(
           'relative z-20 w-full max-w-[800px] flex flex-col items-center',
-          classrooms.length === 0 ? 'justify-center min-h-[calc(100dvh-8rem)]' : 'mt-[10vh]',
+          classrooms.length === 0 ? 'justify-start pt-[5vh]' : 'mt-[5vh]',
         )}
       >
         {/* ── Logo ── */}
@@ -513,17 +514,37 @@ function HomePage() {
             stiffness: 200,
             damping: 20,
           }}
-          className="h-12 md:h-16 mb-2 -ml-2 md:-ml-3"
+          className="h-24 md:h-32 mb-6 -ml-2 md:-ml-3"
+          style={{
+            // Calibrated colorize to Xamine purple (#8b5cf6) - less pink, more violet
+            filter: 'invert(44%) sepia(87%) saturate(1914%) hue-rotate(227deg) brightness(97%) contrast(100%)'
+          }}
         />
 
         {/* ── Slogan ── */}
+        <motion.h1
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+          className="text-3xl md:text-5xl lg:text-7xl text-xamine-navy dark:text-white font-black mb-4 tracking-tighter text-center"
+        >
+          {t('home.slogan').toLowerCase().includes('interactive') ? (
+            <span className="whitespace-nowrap">
+              <span className="text-xamine-navy dark:text-white">your </span>
+              <span className="text-xamine-purple">interactive</span>
+              <span className="text-xamine-navy dark:text-white"> classroom</span>
+            </span>
+          ) : (
+            <span className="text-xamine-navy dark:text-white">{t('home.slogan')}</span>
+          )}
+        </motion.h1>
+
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.25 }}
-          className="text-sm text-muted-foreground/60 mb-8"
+          className="text-lg font-bold text-xamine-navy/60 mb-12 tracking-wide uppercase"
         >
-          {t('home.slogan')}
+
         </motion.p>
 
         {/* ── Unified input area ── */}
@@ -533,7 +554,7 @@ function HomePage() {
           transition={{ delay: 0.35 }}
           className="w-full"
         >
-          <div className="w-full glass rounded-[2rem] shadow-xl shadow-black/[0.03] dark:shadow-black/20 transition-all focus-within:shadow-2xl focus-within:shadow-brand-indigo/10">
+          <div className="w-full bg-white dark:bg-slate-900 glass rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(139,92,246,0.15)] transition-all focus-within:shadow-[0_48px_80px_-16px_rgba(139,92,246,0.2)]">
             {/* ── Greeting + Profile + Agents ── */}
             <div className="relative z-20 flex items-start justify-between">
               <GreetingBar />
@@ -542,15 +563,14 @@ function HomePage() {
               </div>
             </div>
 
-            {/* Textarea */}
             <textarea
               ref={textareaRef}
-              placeholder={t('upload.requirementPlaceholder')}
-              className="w-full resize-none border-0 bg-transparent px-4 pt-1 pb-2 text-[13px] leading-relaxed placeholder:text-muted-foreground/40 focus:outline-none min-h-[140px] max-h-[300px]"
+              placeholder="Teach me rotational mechanics for IIT JEE, or maybe chess or playing a piano in an interactive way"
+              className="w-full resize-none border-0 bg-transparent px-4 pt-1 pb-2 text-[14px] leading-relaxed placeholder:text-xamine-navy/60 dark:placeholder:text-white/40 text-xamine-navy dark:text-gray-200 focus:outline-none min-h-[80px] max-h-[300px] font-medium"
               value={form.requirement}
               onChange={(e) => updateForm('requirement', e.target.value)}
               onKeyDown={handleKeyDown}
-              rows={4}
+              rows={2}
             />
 
             {/* Toolbar row */}
@@ -588,14 +608,14 @@ function HomePage() {
                 onClick={handleGenerate}
                 disabled={!canGenerate}
                 className={cn(
-                  'shrink-0 h-8 rounded-lg flex items-center justify-center gap-1.5 transition-all px-3',
+                  'shrink-0 h-10 rounded-full flex items-center justify-center gap-1.5 transition-all px-6',
                   canGenerate
-                    ? 'bg-primary text-primary-foreground hover:opacity-90 shadow-sm cursor-pointer'
+                    ? 'bg-gradient-to-r from-xamine-purple to-[#9f7aea] text-white shadow-lg shadow-xamine-purple/20 cursor-pointer hover:shadow-xl'
                     : 'bg-muted text-muted-foreground/40 cursor-not-allowed',
                 )}
               >
-                <span className="text-xs font-medium">{t('toolbar.enterClassroom')}</span>
-                <ArrowUp className="size-3.5" />
+                <span className="text-sm font-bold">{t('toolbar.enterClassroom')}</span>
+                <ArrowUp className="size-4" />
               </button>
             </div>
           </div>
@@ -697,7 +717,7 @@ function HomePage() {
       <div className="mt-auto pt-12 pb-4 text-center text-xs text-muted-foreground/40">
         Kaksha - a <a href="https://www.xamine.ai" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors underline underline-offset-2">xamine.ai</a> product
       </div>
-    </div>
+    </AuroraBackground>
   );
 }
 

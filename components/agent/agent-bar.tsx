@@ -153,7 +153,7 @@ export function AgentBar() {
             onClick={() => setOpen(!open)}
           >
             {/* Left side — text changes based on open/close */}
-            <span className="text-xs text-muted-foreground/60 group-hover:text-muted-foreground transition-colors hidden sm:block font-medium flex-1 text-left">
+            <span className="text-xs text-muted-foreground/60 dark:text-white/50 group-hover:text-muted-foreground dark:group-hover:text-white transition-colors hidden sm:block font-medium flex-1 text-left">
               {open ? t('agentBar.expandedTitle') : t('agentBar.readyToLearn')}
             </span>
 

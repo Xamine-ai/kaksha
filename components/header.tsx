@@ -107,7 +107,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
           </div>
         </div>
 
-        <div className="flex items-center gap-4 bg-white/60 dark:bg-gray-800/60 backdrop-blur-md px-2 py-1.5 rounded-full border border-gray-100/50 dark:border-gray-700/50 shadow-sm shrink-0">
+        <div className="flex items-center gap-1 glass px-2 py-1.5 rounded-full shadow-sm shrink-0">
           {/* Language Selector */}
           <div className="relative" ref={languageRef}>
             <button
@@ -115,14 +115,14 @@ export function Header({ currentSceneTitle }: HeaderProps) {
                 setLanguageOpen(!languageOpen);
                 setThemeOpen(false);
               }}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold text-gray-500 dark:text-gray-400 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all shadow-none"
+              className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold text-xamine-navy/70 dark:text-gray-400 hover:text-xamine-purple transition-all"
             >
               <Globe className="w-3.5 h-3.5" />
               <span>{LOCALE_NAMES[locale]}</span>
               <ChevronDown className={cn("w-3 h-3 transition-transform", languageOpen && "rotate-180")} />
             </button>
             {languageOpen && (
-              <div className="absolute top-full mt-2 right-0 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl overflow-hidden z-50 min-w-[160px] animate-in fade-in zoom-in-95 duration-200">
+              <div className="absolute top-full mt-2 right-0 glass rounded-xl shadow-xl overflow-hidden z-50 min-w-[160px] animate-in fade-in zoom-in-95 duration-200">
                 <div className="max-h-[300px] overflow-y-auto py-1">
                   {(Object.entries(LOCALE_NAMES) as [Locale, string][]).map(([code, name]) => (
                     <button
@@ -132,12 +132,12 @@ export function Header({ currentSceneTitle }: HeaderProps) {
                         setLanguageOpen(false);
                       }}
                       className={cn(
-                        'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-between',
-                        locale === code && 'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400 font-bold',
+                        'w-full px-4 py-2.5 text-left text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center justify-between',
+                        locale === code && 'bg-xamine-purple/10 text-xamine-purple font-bold',
                       )}
                     >
                       <span>{name}</span>
-                      {locale === code && <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />}
+                      {locale === code && <div className="w-1.5 h-1.5 rounded-full bg-xamine-purple" />}
                     </button>
                   ))}
                 </div>
@@ -168,7 +168,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
                     setThemeOpen(false);
                   }}
                   className={cn(
-                    'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
+                    'w-full px-4 py-2 text-left text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
                     theme === 'light' &&
                       'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
                   )}
@@ -182,7 +182,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
                     setThemeOpen(false);
                   }}
                   className={cn(
-                    'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
+                    'w-full px-4 py-2 text-left text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
                     theme === 'dark' &&
                       'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
                   )}
@@ -196,7 +196,7 @@ export function Header({ currentSceneTitle }: HeaderProps) {
                     setThemeOpen(false);
                   }}
                   className={cn(
-                    'w-full px-4 py-2 text-left text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
+                    'w-full px-4 py-2 text-left text-sm text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors flex items-center gap-2',
                     theme === 'system' &&
                       'bg-purple-50 dark:bg-purple-900/20 text-purple-600 dark:text-purple-400',
                   )}

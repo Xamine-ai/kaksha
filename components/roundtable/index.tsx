@@ -604,7 +604,7 @@ export function Roundtable({
                   onClick={(e) => e.stopPropagation()}
                   className="absolute inset-x-6 bottom-4 z-20 flex items-center justify-end"
                 >
-                  <div className="relative w-fit max-w-[85%] sm:max-w-[65%] min-w-[200px] sm:min-w-[300px] bg-white/90 dark:bg-gray-800/90 backdrop-blur-md p-2 pr-2 rounded-2xl rounded-br-none shadow-2xl border border-purple-200 dark:border-purple-700 flex items-end gap-2 ring-1 ring-purple-100/50 dark:ring-purple-800/50">
+                  <div className="relative w-fit max-w-[85%] sm:max-w-[65%] min-w-[200px] sm:min-w-[300px] bg-white/90 dark:bg-gray-800/90 backdrop-blur-md p-2 pr-2 rounded-full rounded-br-none shadow-2xl border border-xamine-purple/30 dark:border-xamine-purple/50 flex items-end gap-2 ring-1 ring-xamine-purple/10 dark:ring-xamine-purple/30">
                     <div className="pl-4 flex-1 py-1 min-w-0">
                       <textarea
                         value={inputValue}
@@ -628,8 +628,8 @@ export function Roundtable({
                       className={cn(
                         'p-2.5 text-white rounded-xl transition shadow-md mb-0.5 shrink-0',
                         isSendCooldown
-                          ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed shadow-gray-200 dark:shadow-gray-900/50'
-                          : 'bg-purple-600 hover:bg-purple-700 dark:bg-purple-500 dark:hover:bg-purple-600 shadow-purple-200 dark:shadow-purple-900/50',
+                          ? 'bg-gray-400 dark:bg-gray-600 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-xamine-purple to-[#9f7aea] text-white shadow-lg shadow-xamine-purple/20 hover:shadow-xl',
                       )}
                     >
                       {isSendCooldown ? (
@@ -689,7 +689,7 @@ export function Roundtable({
                     className="pointer-events-auto relative group cursor-pointer"
                     onClick={handleToggleVoice}
                   >
-                    <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-purple-600 to-indigo-700 dark:from-purple-500 dark:to-indigo-600 shadow-[0_4px_20px_rgba(147,51,234,0.3)] flex items-center justify-center z-20 group-hover:scale-105 transition-transform duration-300 border border-white/20 dark:border-white/10">
+                    <div className="relative w-16 h-16 rounded-full bg-gradient-to-br from-xamine-purple to-indigo-700 dark:from-xamine-purple/80 dark:to-indigo-600 shadow-[0_4px_25px_rgba(139,92,246,0.3)] flex items-center justify-center z-20 group-hover:scale-105 transition-transform duration-300 border border-white/20 dark:border-white/10">
                       <Mic className="w-6 h-6 text-white" />
                     </div>
                     <div className="absolute inset-0 rounded-full border-2 border-purple-500 dark:border-purple-400 opacity-40 animate-[ping_2s_ease-in-out_infinite] z-10" />
