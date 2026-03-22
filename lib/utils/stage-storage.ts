@@ -209,21 +209,9 @@ export async function getFirstSlideByStages(
               if (blob) {
                 el.src = URL.createObjectURL(blob);
               } else {
-                // Fallback to CloudFront/S3 URL for the thumbnail
-                const cloudfront = process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
-                const bucket = process.env.NEXT_PUBLIC_S3_BUCKET || 'xamine2';
-                const region = process.env.NEXT_PUBLIC_S3_REGION || 'ap-south-1';
-                
-                // Construct the same key format used in the migration/sync tool
-                // id is stageId:elementId. We probably need the mimeType too, but assuming png/jpg for thumbnails.
-                // Simplified: try to guess common extensions or use a more robust resolution.
-                const key = `media/audio/${stageId}:${el.src}.png`; // Most gen images are png
-                
-                if (cloudfront) {
-                  el.src = `https://${cloudfront}/${key}`;
-                } else {
-                  el.src = `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
-                }
+                // Return same-origin proxy URL to bypass CORS/ORB issues
+                const key = `media/image/${stageId}:${el.src}.png`; // Most gen images are png
+                el.src = `/api/s3/asset?key=${encodeURIComponent(key)}`;
               }
             }
           }

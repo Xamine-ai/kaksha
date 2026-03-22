@@ -2,7 +2,7 @@
  * Audio Player - Audio player interface
  *
  * Handles audio playback, pause, stop, and other operations
- * Loads pre-generated TTS audio files from IndexedDB
+ * Loads pre-generated TTS audio files from IndexedDB or S3
  *
  */
 
@@ -22,15 +22,9 @@ export class AudioPlayer {
   private playbackRate: number = 1;
 
   private getS3AudioUrl(audioId: string): string {
-    const cloudfront = process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
-    const bucket = process.env.NEXT_PUBLIC_S3_BUCKET || 'xamine2';
-    const region = process.env.NEXT_PUBLIC_S3_REGION || 'ap-south-1';
-    
     const key = `media/audio/${audioId}.mp3`; // assuming mp3 for now
-    if (cloudfront) {
-      return `https://${cloudfront}/${key}`;
-    }
-    return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+    // Return same-origin proxy URL to bypass CORS/ORB issues
+    return `/api/s3/asset?key=${encodeURIComponent(key)}`;
   }
 
   /**
@@ -59,7 +53,7 @@ export class AudioPlayer {
       }
 
       // 2. Fall back to IndexedDB (local) or S3 (cloud)
-      let audioRecord = await db.audioFiles.get(audioId);
+      const audioRecord = await db.audioFiles.get(audioId);
       let srcUrl: string | null = null;
       let isBlob = false;
 
@@ -67,8 +61,8 @@ export class AudioPlayer {
         srcUrl = URL.createObjectURL(audioRecord.blob);
         isBlob = true;
       } else {
-        // Not found locally — try CloudFront/S3 directly
-        log.info(`Audio ${audioId} not found locally, using cloud URL`);
+        // Not found locally — try Cloud proxy
+        log.info(`Audio ${audioId} not found locally, using cloud proxy`);
         srcUrl = this.getS3AudioUrl(audioId);
         isBlob = false;
       }
@@ -97,7 +91,7 @@ export class AudioPlayer {
         this.onEndedCallback?.();
       });
 
-      // Handle load errors (e.g. 403/404 from S3)
+      // Handle load errors
       this.audio.addEventListener('error', (e) => {
         log.error(`Failed to load audio from ${srcUrl}:`, e);
       });
@@ -131,9 +125,6 @@ export class AudioPlayer {
       this.audio.currentTime = 0;
       this.audio = null;
     }
-    // Note: onEndedCallback intentionally NOT cleared here because play()
-    // calls stop() internally — clearing would break the callback chain.
-    // Stale callbacks are harmless: engine mode check prevents processNext().
   }
 
   /**
@@ -157,7 +148,6 @@ export class AudioPlayer {
 
   /**
    * Whether there is active audio (playing or paused, but not ended)
-   * Used to decide whether to resume playback or skip to the next line
    */
   public hasActiveAudio(): boolean {
     return this.audio !== null;

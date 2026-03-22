@@ -29,7 +29,10 @@ export async function getFromS3(key: string) {
   });
 
   const response = await s3Client.send(command);
-  return response.Body?.transformToString();
+  return {
+    body: response.Body,
+    contentType: response.ContentType,
+  };
 }
 
 export async function listFromS3(prefix?: string) {
