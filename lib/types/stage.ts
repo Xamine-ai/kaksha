@@ -23,6 +23,8 @@ export interface Stage {
   style?: string;
   // Whiteboard data
   whiteboard?: Whiteboard[];
+  // Personalized student context (research)
+  researchContext?: string;
 }
 
 /**

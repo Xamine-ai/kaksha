@@ -123,6 +123,14 @@ export function buildStructuredPrompt(
 You are teaching ${userProfile.nickname || 'a student'}.${userProfile.bio ? `\nTheir background: ${userProfile.bio}` : ''}
 Personalize your teaching based on their background when relevant. Address them by name naturally.\n`
       : '';
+  
+  // Build personalized research context section (from classroom generation research)
+  const researchContextSection = storeState.stage?.researchContext 
+    ? `\n# Student Data Insight (Xamine API)
+This student has unique progress and performance history:
+${storeState.stage.researchContext}
+Personalize your teaching based on these insights (e.g., focus on their weak areas, skip what they already mastered).\n`
+    : '';
 
   // Build peer context section (what agents already said this round)
   const peerContext = buildPeerContextSection(agentResponses, agentConfig.name);
@@ -180,7 +188,7 @@ ${agentConfig.persona}
 
 ## Your Classroom Role
 ${roleGuideline}
-${studentProfileSection}${peerContext}${languageConstraint}
+${studentProfileSection}${researchContextSection}${peerContext}${languageConstraint}
 # Output Format
 You MUST output a JSON array for ALL responses. Each element is an object with a \`type\` field:
 

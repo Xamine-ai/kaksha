@@ -28,6 +28,9 @@ import {
 } from '@/lib/server/classroom-media-generation';
 import type { UserRequirements } from '@/lib/types/generation';
 import type { Scene, Stage } from '@/lib/types/stage';
+import { generateText, stepCountIs } from 'ai';
+import { z } from 'zod';
+import { getStudentOverallPerformance, getConceptMastery, getStudentSyllabus } from '@/lib/xamine-api';
 
 const log = createLogger('Classroom');
 
@@ -234,6 +237,62 @@ export async function generateClassroom(
     scenesGenerated: 0,
   });
 
+  let xamineContext: string | undefined;
+  if (process.env.XAMINE_STUDENT_TOKEN) {
+    try {
+      log.info('Running pre-generation AI researcher to fetch student data via tools...');
+      await options.onProgress?.({
+        step: 'researching',
+        progress: 11,
+        message: 'Agent securely checking Xamine tools for student insights...',
+        scenesGenerated: 0,
+      });
+
+      const researcher = await generateText({
+        model: languageModel,
+        messages: [{
+          role: 'system',
+          content: 'You are an educational assistant planner. If the user prompt requires adapting to their weak areas, their past performance, or what is left in their syllabus, you SHOULD call the appropriate tools. If you use tools, wait for the data then summarize it. If no tools are needed, you should reply: No Xamine tools needed.'
+        }, {
+          role: 'user',
+          content: requirement
+        }],
+        tools: {
+          getStudentPerformance: {
+            description: 'Fetch the student\'s overall performance data',
+            inputSchema: z.object({}),
+            execute: async (_args: any) => { return await getStudentOverallPerformance(); }
+          },
+          getConceptMastery: {
+            description: 'Fetch the student\'s concept mastery data and identify specifically weak topics',
+            inputSchema: z.object({}),
+            execute: async (_args: any) => { return await getConceptMastery(); }
+          },
+          getStudentSyllabus: {
+            description: 'Fetch the student\'s remaining syllabus',
+            inputSchema: z.object({}),
+            execute: async (_args: any) => { return await getStudentSyllabus(); }
+          },
+        },
+        stopWhen: stepCountIs(5),
+      });
+
+      if (researcher.text && !researcher.text.includes('No Xamine tools needed') && !researcher.text.includes('No specific student data needed')) {
+         xamineContext = `Xamine API Personalized Student Context:\n${researcher.text}\n`;
+         
+         // Fallback manual formatting in case single-step execution was used and returned toolResults instead of text summary
+         if (researcher.toolResults && researcher.toolResults.length > 0) {
+           const manualSummary = researcher.toolResults.map(r => `${r.toolName}: ${JSON.stringify((r as any).result)}`).join('\n');
+           xamineContext += `\nRaw Tool Data:\n${manualSummary}`;
+         }
+         
+         log.info(`Researcher retrieved personal context:\n${xamineContext}`);
+      }
+    } catch(e) {
+      log.warn('AI Researcher Tool calling failed:', e);
+    }
+  }
+
   // Web search (optional, graceful degradation)
   let researchContext: string | undefined;
   if (input.enableWebSearch) {
@@ -252,6 +311,11 @@ export async function generateClassroom(
     } else {
       log.warn('enableWebSearch is true but no Tavily API key configured, skipping web search');
     }
+  }
+
+  // Combine customized Xamine tool output with external web research 
+  if (xamineContext) {
+    researchContext = researchContext ? `${xamineContext}\n${researchContext}` : xamineContext;
   }
 
   await options.onProgress?.({
@@ -300,6 +364,7 @@ export async function generateClassroom(
     style: 'interactive',
     createdAt: Date.now(),
     updatedAt: Date.now(),
+    researchContext: xamineContext,
   };
 
   const store = createInMemoryStore(stage);
