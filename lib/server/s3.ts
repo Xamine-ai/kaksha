@@ -1,13 +1,13 @@
 import { S3Client, PutObjectCommand, GetObjectCommand, ListObjectsV2Command, DeleteObjectCommand } from '@aws-sdk/client-s3';
 
-const bucketName = process.env.AWS_S3_BUCKET || 'xamine2';
-const region = process.env.AWS_REGION || 'ap-south-1';
+const bucketName = process.env.APP_AWS_S3_BUCKET || process.env.AWS_S3_BUCKET || 'xamine2';
+const region = process.env.APP_AWS_REGION || process.env.AWS_REGION || 'ap-south-1';
 
 const s3Client = new S3Client({
   region,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+    accessKeyId: process.env.APP_AWS_ACCESS_KEY_ID || process.env.AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.APP_AWS_SECRET_ACCESS_KEY || process.env.AWS_SECRET_ACCESS_KEY || '',
   },
 });
 
@@ -55,7 +55,7 @@ export async function deleteFromS3(key: string) {
 }
 
 export function getS3Url(key: string) {
-  const cloudfrontDomain = process.env.CLOUDFRONT_DOMAIN;
+  const cloudfrontDomain = process.env.APP_CLOUDFRONT_DOMAIN || process.env.CLOUDFRONT_DOMAIN || process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
   if (cloudfrontDomain) {
     return `https://${cloudfrontDomain}/${key}`;
   }
