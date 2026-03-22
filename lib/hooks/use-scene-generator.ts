@@ -168,16 +168,6 @@ export async function generateAndStoreTTS(
     format: data.format,
     createdAt: Date.now(),
   });
-
-  // NEW: Sync to S3 (Background)
-  const formData = new FormData();
-  formData.append('file', blob, `${audioId}.${data.format}`);
-  formData.append('assetId', audioId);
-  formData.append('prefix', 'media/audio');
-  void fetch('/api/s3/upload-asset', {
-    method: 'POST',
-    body: formData,
-  }).catch((e: Error) => log.error(`Failed to sync tts ${audioId} to S3:`, e));
 }
 
 /** Generate TTS for all speech actions in a scene. Returns result. */

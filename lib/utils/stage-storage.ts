@@ -67,12 +67,10 @@ export async function saveStageData(stageId: string, data: StageStoreData): Prom
     }
 
     // Save chat sessions to independent table
+    // Only save to local storage (IndexedDB)
     if (data.chats) {
       await saveChatSessions(stageId, data.chats);
     }
-
-    // NEW: Sync to S3 (Background)
-    void uploadStageToS3(stageId, data).catch((e: Error) => log.error('Failed to sync to S3:', e));
 
     log.info(`Saved stage: ${stageId}`);
   } catch (error) {

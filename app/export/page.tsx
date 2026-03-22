@@ -22,6 +22,7 @@ import { AuroraBackground } from '@/components/ui/aurora-background';
 export default function ExportPage() {
   const router = useRouter();
   const [stages, setStages] = useState<StageListItem[]>([]);
+  const [s3Projects, setS3Projects] = useState<string[]>([]);
   const [uploading, setUploading] = useState<Record<string, 'idle' | 'loading' | 'success' | 'error'>>({});
   const [isBulkUploading, setIsBulkUploading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -29,10 +30,19 @@ export default function ExportPage() {
   useEffect(() => {
     const fetchStages = async () => {
       try {
-        const list = await listStages();
-        setStages(list);
-        const statusMap: Record<string, 'idle'> = {};
-        list.forEach(s => statusMap[s.id] = 'idle');
+        const [localList, s3ListResponse] = await Promise.all([
+          listStages(),
+          fetch('/api/s3/list').then(res => res.json()).catch(() => ({ projects: [] }))
+        ]);
+        
+        setStages(localList);
+        const s3Ids = (s3ListResponse?.projects || []).map((p: any) => p.id);
+        setS3Projects(s3Ids);
+
+        const statusMap: Record<string, 'idle' | 'success'> = {};
+        localList.forEach(s => {
+          statusMap[s.id] = s3Ids.includes(s.id) ? 'success' : 'idle';
+        });
         setUploading(statusMap);
       } catch (err) {
         console.error('Failed to load local stages:', err);
@@ -205,20 +215,18 @@ export default function ExportPage() {
                   </div>
                 </div>
                 
-                <div className="mt-4 flex items-center justify-between">
+                 <div className="mt-4 flex items-center justify-between">
                    <p className="text-xs text-slate-400 font-medium">
                      ID: {stage.id.substring(0, 8)}...
                    </p>
-                   {uploading[stage.id] !== 'success' && (
-                     <button 
-                       onClick={() => uploadToS3(stage.id)}
-                       disabled={uploading[stage.id] === 'loading'}
-                       className="text-xs font-bold text-xamine-purple hover:underline underline-offset-4 flex items-center gap-1 group/btn"
-                     >
-                       Upload Now
-                       <ChevronRight className="size-3 transition-transform group-hover/btn:translate-x-0.5" />
-                     </button>
-                   )}
+                   <button 
+                     onClick={() => uploadToS3(stage.id)}
+                     disabled={uploading[stage.id] === 'loading'}
+                     className={`text-xs font-bold ${uploading[stage.id] === 'success' ? 'text-green-600' : 'text-xamine-purple'} hover:underline underline-offset-4 flex items-center gap-1 group/btn`}
+                   >
+                     {uploading[stage.id] === 'success' ? 'Update Cloud' : 'Upload Now'}
+                     <ChevronRight className="size-3 transition-transform group-hover/btn:translate-x-0.5" />
+                   </button>
                 </div>
               </motion.div>
             ))}
