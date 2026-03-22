@@ -54,6 +54,12 @@ export function getActionDescriptions(allowedActions: string[]): string {
       'Close the whiteboard and return to the slide view. Always close after you finish drawing. Parameters: {}',
     play_video:
       'Start playback of a video element on the current slide. Synchronous — blocks until the video finishes playing. Use a speech action before this to introduce the video. Parameters: { elementId: string }',
+    get_student_performance:
+      "Fetch the student's overall performance data from the Xamine API. Call this when the student asks about their general progress. Parameters: {}",
+    get_concept_mastery:
+      "Fetch the student's concept mastery data from the Xamine API. Call this when the student asks about their weak concepts or specific topic mastery. Parameters: {}",
+    get_student_syllabus:
+      "Fetch the student's remaining syllabus and progress from the Xamine API. Call this when the student asks about what is left to study. Parameters: {}",
   };
 
   if (allowedActions.length === 0) {

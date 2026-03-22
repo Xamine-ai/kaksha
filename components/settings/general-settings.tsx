@@ -22,6 +22,7 @@ import { Globe } from 'lucide-react';
 import { toast } from 'sonner';
 import { createLogger } from '@/lib/logger';
 import { cn } from '@/lib/utils';
+import { getStudentOverallPerformance, getConceptMastery, getStudentSyllabus, getNewStudentToken } from '@/lib/xamine-api';
 
 const log = createLogger('GeneralSettings');
 

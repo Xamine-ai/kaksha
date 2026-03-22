@@ -161,6 +161,18 @@ export interface DiscussionAction extends ActionBase {
   agentId?: string;
 }
 
+export interface GetStudentPerformanceAction extends ActionBase {
+  type: 'get_student_performance';
+}
+
+export interface GetConceptMasteryAction extends ActionBase {
+  type: 'get_concept_mastery';
+}
+
+export interface GetStudentSyllabusAction extends ActionBase {
+  type: 'get_student_syllabus';
+}
+
 // ==================== Union type ====================
 
 export type Action =
@@ -178,7 +190,10 @@ export type Action =
   | WbClearAction
   | WbDeleteAction
   | WbCloseAction
-  | DiscussionAction;
+  | DiscussionAction
+  | GetStudentPerformanceAction
+  | GetConceptMasteryAction
+  | GetStudentSyllabusAction;
 
 export type ActionType = Action['type'];
 
@@ -188,7 +203,6 @@ export const FIRE_AND_FORGET_ACTIONS: ActionType[] = ['spotlight', 'laser'];
 /** Action types that only work on slide scenes (require slide canvas elements) */
 export const SLIDE_ONLY_ACTIONS: ActionType[] = ['spotlight', 'laser'];
 
-/** Action types that must complete before the next action runs */
 export const SYNC_ACTIONS: ActionType[] = [
   'speech',
   'play_video',
@@ -203,6 +217,9 @@ export const SYNC_ACTIONS: ActionType[] = [
   'wb_delete',
   'wb_close',
   'discussion',
+  'get_student_performance',
+  'get_concept_mastery',
+  'get_student_syllabus',
 ];
 
 // ==================== Canvas utility types (non-action) ====================

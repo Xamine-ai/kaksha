@@ -9,6 +9,7 @@ import { useI18n } from '@/lib/hooks/use-i18n';
 import { CircleStop } from 'lucide-react';
 import { InlineActionTag } from './inline-action-tag';
 import { useUserProfileStore } from '@/lib/store/user-profile';
+import { PerformanceCard, ConceptMasteryList, SyllabusTracker } from './xamine-components';
 
 /** Extended message part type covering standard + custom action parts */
 interface MessagePart {
@@ -157,10 +158,22 @@ const MessageBubble = memo(function MessageBubble({
           }
 
           if (part.type?.startsWith('action-')) {
+            const actionName = part.actionName || part.type.replace('action-', '');
+            
+            if (actionName === 'get_student_performance') {
+              return <PerformanceCard key={`${message.id}-action-${i}`} />;
+            }
+            if (actionName === 'get_concept_mastery') {
+              return <ConceptMasteryList key={`${message.id}-action-${i}`} />;
+            }
+            if (actionName === 'get_student_syllabus') {
+              return <SyllabusTracker key={`${message.id}-action-${i}`} />;
+            }
+
             return (
               <InlineActionTag
                 key={`${message.id}-action-${i}`}
-                actionName={part.actionName || part.type.replace('action-', '')}
+                actionName={actionName}
                 state={part.state || 'result'}
               />
             );

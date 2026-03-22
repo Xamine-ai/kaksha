@@ -27,6 +27,7 @@ import {
   Volume2,
   Mic,
   ChevronDown,
+  Globe,
 } from 'lucide-react';
 import { useI18n } from '@/lib/hooks/use-i18n';
 import { useSettingsStore } from '@/lib/store/settings';
@@ -56,6 +57,7 @@ import { WebSearchSettings } from './web-search-settings';
 import { WEB_SEARCH_PROVIDERS } from '@/lib/web-search/constants';
 import type { WebSearchProviderId } from '@/lib/web-search/types';
 import { GeneralSettings } from './general-settings';
+import { XamineSettings } from './xamine-settings';
 import { ModelEditDialog } from './model-edit-dialog';
 import { AddProviderDialog, type NewProviderData } from './add-provider-dialog';
 import type { SettingsSection, EditingModel } from '@/lib/types/settings';
@@ -510,6 +512,8 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
     switch (activeSection) {
       case 'general':
         return <h2 className="text-lg font-semibold">{t('settings.systemSettings')}</h2>;
+      case 'xamine':
+        return <h2 className="text-lg font-semibold">Xamine API Integration</h2>;
       case 'providers':
         if (selectedProvider) {
           return (
@@ -731,6 +735,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
               { id: 'asr' as const, icon: Mic, label: t('settings.asrSettings') },
               { id: 'pdf' as const, icon: FileText, label: t('settings.pdfSettings') },
               { id: 'web-search' as const, icon: Search, label: t('settings.webSearchSettings') },
+              { id: 'xamine' as const, icon: Globe, label: 'Xamine API' },
             ].map((section) => (
               <button
                 key={section.id}
@@ -972,6 +977,7 @@ export function SettingsDialog({ open, onOpenChange, initialSection }: SettingsD
             {/* Content */}
             <div className="flex-1 overflow-y-auto p-4 md:p-5">
               {activeSection === 'general' && <GeneralSettings />}
+              {activeSection === 'xamine' && <XamineSettings />}
 
               {activeSection === 'providers' && selectedProvider && (
                 <ProviderConfigPanel
