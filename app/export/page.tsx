@@ -48,6 +48,7 @@ export default function ExportPage() {
       const data = await loadStageData(id);
       if (!data) throw new Error('Stage data not found');
 
+      // 1. Upload Project JSON
       const response = await fetch('/api/s3/upload', {
         method: 'POST',
         headers: {
@@ -60,8 +61,53 @@ export default function ExportPage() {
         throw new Error(`Upload failed: ${response.statusText}`);
       }
 
+      const { db } = await import('@/lib/utils/database');
+
+      // 2. Upload Associated Audio Files
+      const audioIds = new Set<string>();
+      data.scenes.forEach(scene => {
+        (scene.actions || []).forEach(action => {
+           if (action.type === 'speech' && action.audioId) {
+             audioIds.add(action.audioId);
+           }
+        });
+      });
+
+      if (audioIds.size > 0) {
+        console.log(`Uploading ${audioIds.size} audio files...`);
+        for (const audioId of audioIds) {
+          const record = await db.audioFiles.get(audioId);
+          if (record && record.blob) {
+            const formData = new FormData();
+            formData.append('file', record.blob, `${audioId}.${record.format}`);
+            formData.append('assetId', audioId);
+            formData.append('prefix', 'media/audio');
+            await fetch('/api/s3/upload-asset', {
+              method: 'POST',
+              body: formData,
+            }).catch(e => console.error(`Failed to sync audio ${audioId}:`, e));
+          }
+        }
+      }
+
+      // 3. Upload AI-generated Media Files (images/videos)
+      const mediaRecords = await db.mediaFiles.where('stageId').equals(id).toArray();
+      if (mediaRecords.length > 0) {
+        console.log(`Uploading ${mediaRecords.length} media files...`);
+        for (const rec of mediaRecords) {
+           const formData = new FormData();
+           formData.append('file', rec.blob, `${rec.id}.${rec.mimeType.split('/')[1] || 'png'}`);
+           formData.append('assetId', rec.id); 
+           formData.append('prefix', rec.type === 'image' ? 'media/image' : 'media/video');
+           await fetch('/api/s3/upload-asset', { 
+             method: 'POST',
+             body: formData,
+           }).catch(e => console.error(`Failed to sync media ${rec.id}:`, e));
+        }
+      }
+
       setUploading(prev => ({ ...prev, [id]: 'success' }));
-      toast.success(`Project "${data.stage.name}" uploaded to S3 successfully`);
+      toast.success(`Project "${data.stage.name}" uploaded with ${audioIds.size} audio and ${mediaRecords.length} media files`);
     } catch (err) {
       console.error(`Upload error for stage ${id}:`, err);
       setUploading(prev => ({ ...prev, [id]: 'error' }));

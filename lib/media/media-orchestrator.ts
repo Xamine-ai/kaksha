@@ -148,6 +148,17 @@ async function generateSingleMedia(
       createdAt: Date.now(),
     });
 
+    // NEW: Sync AI-generated media to S3 (Background)
+    const mediaId = mediaFileKey(stageId, req.elementId);
+    const mediaFormData = new FormData();
+    mediaFormData.append('file', blob, `${mediaId}.${mimeType.split('/')[1] || 'png'}`);
+    mediaFormData.append('assetId', mediaId);
+    mediaFormData.append('prefix', req.type === 'image' ? 'media/image' : 'media/video');
+    void fetch('/api/s3/upload-asset', {
+      method: 'POST',
+      body: mediaFormData,
+    }).catch((e: Error) => log.error(`Failed to sync ${req.type} ${mediaId} to S3:`, e));
+
     // Update store with object URL
     const objectUrl = URL.createObjectURL(blob);
     const posterObjectUrl = posterBlob ? URL.createObjectURL(posterBlob) : undefined;

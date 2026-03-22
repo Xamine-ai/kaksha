@@ -21,6 +21,18 @@ export class AudioPlayer {
   private volume: number = 1;
   private playbackRate: number = 1;
 
+  private getS3AudioUrl(audioId: string): string {
+    const cloudfront = process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
+    const bucket = process.env.NEXT_PUBLIC_S3_BUCKET || 'xamine2';
+    const region = process.env.NEXT_PUBLIC_S3_REGION || 'ap-south-1';
+    
+    const key = `media/audio/${audioId}.mp3`; // assuming mp3 for now
+    if (cloudfront) {
+      return `https://${cloudfront}/${key}`;
+    }
+    return `https://${bucket}.s3.${region}.amazonaws.com/${key}`;
+  }
+
   /**
    * Play audio (from URL or IndexedDB pre-generated cache)
    * @param audioId Audio ID
@@ -46,11 +58,22 @@ export class AudioPlayer {
         return true;
       }
 
-      // 2. Fall back to IndexedDB (client-generated TTS)
-      const audioRecord = await db.audioFiles.get(audioId);
+      // 2. Fall back to IndexedDB (local) or S3 (cloud)
+      let audioRecord = await db.audioFiles.get(audioId);
+      let srcUrl: string | null = null;
+      let isBlob = false;
 
-      if (!audioRecord) {
-        // Pre-generated audio does not exist (generation failed), skip silently
+      if (audioRecord) {
+        srcUrl = URL.createObjectURL(audioRecord.blob);
+        isBlob = true;
+      } else {
+        // Not found locally — try CloudFront/S3 directly
+        log.info(`Audio ${audioId} not found locally, using cloud URL`);
+        srcUrl = this.getS3AudioUrl(audioId);
+        isBlob = false;
+      }
+
+      if (!srcUrl) {
         return false;
       }
 
@@ -59,10 +82,8 @@ export class AudioPlayer {
 
       // Create audio element
       this.audio = new Audio();
-
-      // Set audio source
-      const blobUrl = URL.createObjectURL(audioRecord.blob);
-      this.audio.src = blobUrl;
+      this.audio.src = srcUrl;
+      
       if (this.muted) this.audio.volume = 0;
       else this.audio.volume = this.volume;
 
@@ -72,8 +93,13 @@ export class AudioPlayer {
 
       // Set ended callback
       this.audio.addEventListener('ended', () => {
-        URL.revokeObjectURL(blobUrl);
+        if (isBlob && srcUrl) URL.revokeObjectURL(srcUrl);
         this.onEndedCallback?.();
+      });
+
+      // Handle load errors (e.g. 403/404 from S3)
+      this.audio.addEventListener('error', (e) => {
+        log.error(`Failed to load audio from ${srcUrl}:`, e);
       });
 
       // Play
