@@ -24,6 +24,7 @@ import { useI18n } from '@/lib/hooks/use-i18n';
 import { Locale } from '@/lib/i18n';
 import { LOCALE_NAMES } from '@/lib/i18n/names';
 import { createLogger } from '@/lib/logger';
+import { listStagesFromS3, uploadStageToS3 } from '@/lib/utils/s3-client-storage';
 import { Button } from '@/components/ui/button';
 import { Textarea as UITextarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
@@ -160,11 +161,30 @@ function HomePage() {
 
   const loadClassrooms = async () => {
     try {
-      const list = await listStages();
-      setClassrooms(list);
-      // Load first slide thumbnails
-      if (list.length > 0) {
-        const slides = await getFirstSlideByStages(list.map((c) => c.id));
+      // Load local classrooms
+      const localList = await listStages();
+      
+      // Load S3 classrooms (Everyone can see)
+      let s3List: StageListItem[] = [];
+      try {
+        s3List = await listStagesFromS3();
+      } catch (e) {
+        log.warn('Failed to load S3 classrooms:', e);
+      }
+
+      // Merge and deduplicate by ID (S3 version takes priority if IDs collide)
+      const merged = [...s3List];
+      for (const local of localList) {
+        if (!merged.find(s => s.id === local.id)) {
+          merged.push(local);
+        }
+      }
+
+      setClassrooms(merged);
+      
+      // Load first slide thumbnails for all
+      if (merged.length > 0) {
+        const slides = await getFirstSlideByStages(merged.map((c) => c.id));
         setThumbnails(slides);
       }
     } catch (err) {
@@ -443,6 +463,23 @@ function HomePage() {
               </button>
             </div>
           )}
+        </div>
+
+        <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />
+
+        {/* Migration / Export Button */}
+        <div className="relative">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                onClick={() => router.push('/export')}
+                className="p-2 rounded-full text-gray-400 dark:text-gray-500 hover:bg-white dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 hover:shadow-sm transition-all group"
+              >
+                <Globe className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent>Cloud Projects</TooltipContent>
+          </Tooltip>
         </div>
 
         <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700" />

@@ -11,6 +11,7 @@ import { db } from './database';
 import { saveChatSessions, loadChatSessions, deleteChatSessions } from './chat-storage';
 import { clearPlaybackState } from './playback-storage';
 import { createLogger } from '@/lib/logger';
+import { getStageFromS3, uploadStageToS3 } from './s3-client-storage';
 
 const log = createLogger('StageStorage');
 
@@ -70,6 +71,9 @@ export async function saveStageData(stageId: string, data: StageStoreData): Prom
       await saveChatSessions(stageId, data.chats);
     }
 
+    // NEW: Sync to S3 (Background)
+    void uploadStageToS3(stageId, data).catch((e: Error) => log.error('Failed to sync to S3:', e));
+
     log.info(`Saved stage: ${stageId}`);
   } catch (error) {
     log.error('Failed to save stage:', error);
@@ -83,9 +87,18 @@ export async function saveStageData(stageId: string, data: StageStoreData): Prom
 export async function loadStageData(stageId: string): Promise<StageStoreData | null> {
   try {
     // Load stage
-    const stage = await db.stages.get(stageId);
+    let stage = await db.stages.get(stageId);
     if (!stage) {
-      log.info(`Stage not found: ${stageId}`);
+      log.info(`Stage not found in local DB, checking S3: ${stageId}`);
+      try {
+        const s3Data = await getStageFromS3(stageId);
+        if (s3Data) {
+          log.info(`Loaded stage from S3: ${stageId}`);
+          return s3Data;
+        }
+      } catch (e) {
+        log.warn(`Failed to fetch from S3: ${stageId}`, e);
+      }
       return null;
     }
 
