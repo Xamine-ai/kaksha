@@ -13,8 +13,23 @@ export async function POST(req: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    // Key: ${prefix}/${assetId}.${extension}
-    const key = `${prefix}/${assetId}.${file.type.split('/')[1] || 'mp3'}`;
+    
+    // Normalize extensions from mime types
+    const mimeMap: Record<string, string> = {
+      'audio/mpeg': 'mp3',
+      'audio/wav': 'wav',
+      'audio/x-wav': 'wav',
+      'audio/aac': 'aac',
+      'audio/ogg': 'ogg',
+      'audio/webm': 'webm',
+      'image/jpeg': 'jpg',
+      'image/png': 'png',
+      'image/webp': 'webp',
+      'video/mp4': 'mp4',
+    };
+    
+    const extension = mimeMap[file.type] || file.type.split('/')[1] || (prefix === 'media/audio' ? 'mp3' : 'png');
+    const key = `${prefix}/${assetId}.${extension}`;
     
     await uploadToS3(key, buffer, file.type);
 

@@ -34,6 +34,8 @@ import type { ImageProviderId } from '@/lib/media/types';
 import type { VideoProviderId } from '@/lib/media/types';
 import type { TTSProviderId } from '@/lib/audio/types';
 import { splitLongSpeechActions } from '@/lib/audio/tts-utils';
+import type { AgentInfo } from '@/lib/generation/pipeline-types';
+
 
 const log = createLogger('ClassroomMedia');
 
@@ -201,7 +203,6 @@ export function replaceMediaPlaceholders(scenes: Scene[], mediaMap: Record<strin
 // TTS generation
 // ---------------------------------------------------------------------------
 
-import type { AgentInfo } from '@/lib/generation/pipeline-types';
 
 export async function generateTTSForClassroom(
   scenes: Scene[],
@@ -237,7 +238,7 @@ export async function generateTTSForClassroom(
   let voice = DEFAULT_TTS_VOICES[providerId] || 'default';
   if (providerId === 'sarvam-tts') {
     // Pick male (advait) or female (shreya) for Sarvam TTS based on teacher gender
-    voice = gender === 'female' ? 'bulbul:v3:hi-IN:female' : 'bulbul:v3:hi-IN:male';
+    voice = gender === 'female' ? 'bulbul:v2:hi-IN:female' : 'bulbul:v2:hi-IN:male';
   } else if (providerId === 'openai-tts') {
     voice = gender === 'female' ? 'nova' : 'alloy';
   }
@@ -255,10 +256,26 @@ export async function generateTTSForClassroom(
       const speechAction = action as SpeechAction;
       const audioId = `tts_${action.id}`;
 
+      // Dynamically resolve voice for this speech if text starts with "Name:"
+      let currentVoice = voice;
+      const text = speechAction.text.trim();
+      const nameMatch = text.match(/^([^:\n]+):/);
+      if (nameMatch) {
+         const name = nameMatch[1].trim();
+         const agent = agents?.find(a => a.name === name);
+         if (agent) {
+           if (providerId === 'sarvam-tts') {
+             currentVoice = agent.gender === 'female' ? 'bulbul:v2:hi-IN:female' : 'bulbul:v2:hi-IN:male';
+           } else if (providerId === 'openai-tts') {
+             currentVoice = agent.gender === 'female' ? 'nova' : 'alloy';
+           }
+         }
+      }
+
       try {
         const result = await generateTTS(
-          { providerId, apiKey, baseUrl: ttsBaseUrl, voice, speed: speechAction.speed },
-          speechAction.text,
+          { providerId, apiKey, baseUrl: ttsBaseUrl, voice: currentVoice, speed: speechAction.speed },
+          text,
         );
 
         const filename = `${audioId}.${format}`;
@@ -267,7 +284,7 @@ export async function generateTTSForClassroom(
         speechAction.audioId = audioId;
         speechAction.audioUrl = mediaServingUrl(baseUrl, classroomId, `audio/${filename}`);
         log.info(
-          `Generated TTS: ${filename} (${result.audio.length} bytes) using voice: ${voice}`,
+          `Generated TTS: ${filename} (${result.audio.length} bytes) using voice: ${currentVoice}`,
         );
       } catch (err) {
         log.warn(`TTS generation failed for action ${action.id}:`, err);
