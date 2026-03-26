@@ -606,6 +606,49 @@ export const TTS_PROVIDERS: Record<TTSProviderId, TTSProviderConfig> = {
     supportedFormats: ['mp3', 'wav', 'pcm'],
   },
 
+  'sarvam-tts': {
+    id: 'sarvam-tts',
+    name: 'Sarvam AI (Bulbul)',
+    requiresApiKey: true,
+    defaultBaseUrl: 'https://api.sarvam.ai',
+    icon: '/logos/sarvam.svg',
+    voices: [
+      // Bulbul v3 (High Quality)
+      { id: 'bulbul:v3:hi-IN:male', name: 'Bulbul v3 (Hindi Male)', language: 'hi-IN', gender: 'male' },
+      { id: 'bulbul:v3:hi-IN:female', name: 'Bulbul v3 (Hindi Female)', language: 'hi-IN', gender: 'female' },
+      { id: 'bulbul:v3:en-IN:male', name: 'Bulbul v3 (English Male)', language: 'en-IN', gender: 'male' },
+      { id: 'bulbul:v3:en-IN:female', name: 'Bulbul v3 (English Female)', language: 'en-IN', gender: 'female' },
+      { id: 'bulbul:v3:bn-IN:male', name: 'Bulbul v3 (Bengali Male)', language: 'bn-IN', gender: 'male' },
+      { id: 'bulbul:v3:bn-IN:female', name: 'Bulbul v3 (Bengali Female)', language: 'bn-IN', gender: 'female' },
+      { id: 'bulbul:v3:kn-IN:male', name: 'Bulbul v3 (Kannada Male)', language: 'kn-IN', gender: 'male' },
+      { id: 'bulbul:v3:kn-IN:female', name: 'Bulbul v3 (Kannada Female)', language: 'kn-IN', gender: 'female' },
+      { id: 'bulbul:v3:ml-IN:male', name: 'Bulbul v3 (Malayalam Male)', language: 'ml-IN', gender: 'male' },
+      { id: 'bulbul:v3:ml-IN:female', name: 'Bulbul v3 (Malayalam Female)', language: 'ml-IN', gender: 'female' },
+      { id: 'bulbul:v3:mr-IN:male', name: 'Bulbul v3 (Marathi Male)', language: 'mr-IN', gender: 'male' },
+      { id: 'bulbul:v3:mr-IN:female', name: 'Bulbul v3 (Marathi Female)', language: 'mr-IN', gender: 'female' },
+      { id: 'bulbul:v3:pa-IN:male', name: 'Bulbul v3 (Punjabi Male)', language: 'pa-IN', gender: 'male' },
+      { id: 'bulbul:v3:pa-IN:female', name: 'Bulbul v3 (Punjabi Female)', language: 'pa-IN', gender: 'female' },
+      { id: 'bulbul:v3:ta-IN:male', name: 'Bulbul v3 (Tamil Male)', language: 'ta-IN', gender: 'male' },
+      { id: 'bulbul:v3:ta-IN:female', name: 'Bulbul v3 (Tamil Female)', language: 'ta-IN', gender: 'female' },
+      { id: 'bulbul:v3:te-IN:male', name: 'Bulbul v3 (Telugu Male)', language: 'te-IN', gender: 'male' },
+      { id: 'bulbul:v3:te-IN:female', name: 'Bulbul v3 (Telugu Female)', language: 'te-IN', gender: 'female' },
+      { id: 'bulbul:v3:gu-IN:male', name: 'Bulbul v3 (Gujarati Male)', language: 'gu-IN', gender: 'male' },
+      { id: 'bulbul:v3:gu-IN:female', name: 'Bulbul v3 (Gujarati Female)', language: 'gu-IN', gender: 'female' },
+      { id: 'bulbul:v3:or-IN:male', name: 'Bulbul v3 (Oriya Male)', language: 'or-IN', gender: 'male' },
+      { id: 'bulbul:v3:or-IN:female', name: 'Bulbul v3 (Oriya Female)', language: 'or-IN', gender: 'female' },
+      
+      // Bulbul v2 (Low Latency)
+      { id: 'bulbul:v2:hi-IN:male', name: 'Bulbul v2 (Hindi Male)', language: 'hi-IN', gender: 'male' },
+      { id: 'bulbul:v2:hi-IN:female', name: 'Bulbul v2 (Hindi Female)', language: 'hi-IN', gender: 'female' },
+      { id: 'bulbul:v2:en-IN:male', name: 'Bulbul v2 (English Male)', language: 'en-IN', gender: 'male' },
+      { id: 'bulbul:v2:en-IN:female', name: 'Bulbul v2 (English Female)', language: 'en-IN', gender: 'female' },
+      { id: 'bulbul:v2:bn-IN:male', name: 'Bulbul v2 (Bengali Male)', language: 'bn-IN', gender: 'male' },
+      { id: 'bulbul:v2:bn-IN:female', name: 'Bulbul v2 (Bengali Female)', language: 'bn-IN', gender: 'female' },
+    ],
+    supportedFormats: ['wav', 'mp3', 'aac', 'opus', 'flac'],
+    speedRange: { min: 0.1, max: 3.0, default: 1.0 },
+  },
+
   'browser-native-tts': {
     id: 'browser-native-tts',
     name: '浏览器原生 (Web Speech API)',
@@ -833,6 +876,7 @@ export const DEFAULT_TTS_VOICES: Record<TTSProviderId, string> = {
   'azure-tts': 'zh-CN-XiaoxiaoNeural',
   'glm-tts': 'tongtong',
   'qwen-tts': 'Cherry',
+  'sarvam-tts': 'bulbul:v3:hi-IN',
   'browser-native-tts': 'default',
 };
 

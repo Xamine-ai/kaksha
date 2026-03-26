@@ -11,6 +11,7 @@ export interface AgentInfo {
   id: string;
   name: string;
   role: string;
+  gender?: 'male' | 'female' | 'neutral';
   persona?: string;
 }
 

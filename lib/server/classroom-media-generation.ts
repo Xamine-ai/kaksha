@@ -201,10 +201,13 @@ export function replaceMediaPlaceholders(scenes: Scene[], mediaMap: Record<strin
 // TTS generation
 // ---------------------------------------------------------------------------
 
+import type { AgentInfo } from '@/lib/generation/pipeline-types';
+
 export async function generateTTSForClassroom(
   scenes: Scene[],
   classroomId: string,
   baseUrl: string,
+  agents?: AgentInfo[],
 ): Promise<void> {
   const audioDir = path.join(CLASSROOMS_DIR, classroomId, 'audio');
   await ensureDir(audioDir);
@@ -225,14 +228,26 @@ export async function generateTTSForClassroom(
     return;
   }
   const ttsBaseUrl = resolveTTSBaseUrl(providerId) || TTS_PROVIDERS[providerId]?.defaultBaseUrl;
-  const voice = DEFAULT_TTS_VOICES[providerId] || 'default';
+
+  // Determine teacher's gender for voice mapping
+  const teacher = agents?.find((a) => a.role === 'teacher');
+  const gender = teacher?.gender || 'male';
+
+  // Mapping voices based on provider and gender
+  let voice = DEFAULT_TTS_VOICES[providerId] || 'default';
+  if (providerId === 'sarvam-tts') {
+    // Pick male (advait) or female (shreya) for Sarvam TTS based on teacher gender
+    voice = gender === 'female' ? 'bulbul:v3:hi-IN:female' : 'bulbul:v3:hi-IN:male';
+  } else if (providerId === 'openai-tts') {
+    voice = gender === 'female' ? 'nova' : 'alloy';
+  }
+
   const format = TTS_PROVIDERS[providerId]?.supportedFormats?.[0] || 'mp3';
 
   for (const scene of scenes) {
     if (!scene.actions) continue;
 
-    // Split long speech actions into multiple shorter ones before TTS generation,
-    // mirroring the client-side approach. Each sub-action gets its own audio file.
+    // Split long speech actions into multiple shorter ones before TTS generation
     scene.actions = splitLongSpeechActions(scene.actions, providerId);
 
     for (const action of scene.actions) {
@@ -251,7 +266,9 @@ export async function generateTTSForClassroom(
 
         speechAction.audioId = audioId;
         speechAction.audioUrl = mediaServingUrl(baseUrl, classroomId, `audio/${filename}`);
-        log.info(`Generated TTS: ${filename} (${result.audio.length} bytes)`);
+        log.info(
+          `Generated TTS: ${filename} (${result.audio.length} bytes) using voice: ${voice}`,
+        );
       } catch (err) {
         log.warn(`TTS generation failed for action ${action.id}:`, err);
       }

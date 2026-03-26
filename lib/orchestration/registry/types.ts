@@ -8,6 +8,7 @@ export interface AgentConfig {
   name: string; // Display name (Chinese)
   role: string; // Short role description
   persona: string; // Full system prompt (personality, responsibilities)
+  gender?: 'male' | 'female' | 'neutral';
   avatar: string; // Emoji or image URL
   color: string; // UI theme color (hex)
   allowedActions: string[]; // Action types this agent can use
@@ -28,6 +29,7 @@ export interface AgentTemplate {
   name: string;
   role: string;
   persona: string;
+  gender?: 'male' | 'female' | 'neutral';
   avatar: string;
   color: string;
   allowedActions: string[];

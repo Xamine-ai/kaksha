@@ -130,6 +130,9 @@ export async function generateTTS(
     case 'qwen-tts':
       return await generateQwenTTS(config, text);
 
+    case 'sarvam-tts':
+      return await generateSarvamTTS(config, text);
+
     case 'browser-native-tts':
       throw new Error(
         'Browser Native TTS must be handled client-side using Web Speech API. This provider cannot be used on the server.',
@@ -138,6 +141,74 @@ export async function generateTTS(
     default:
       throw new Error(`Unsupported TTS provider: ${config.providerId}`);
   }
+}
+
+/**
+ * Sarvam AI TTS (Bulbul) implementation
+ */
+async function generateSarvamTTS(
+  config: TTSModelConfig,
+  text: string,
+): Promise<TTSGenerationResult> {
+  const baseUrl = config.baseUrl || TTS_PROVIDERS['sarvam-tts'].defaultBaseUrl;
+
+  // 1. Preprocess text: Format numbers > 4 digits with commas for better pronunciation
+  // Example: '10000' -> '10,000'
+  const processedText = text.replace(/\b\d{5,}\b/g, (num) => {
+    return Number(num).toLocaleString('en-IN');
+  });
+
+  // 2. Parse voice ID: bulbul:v3:hi-IN:male -> model=bulbul:v3, target_language_code=hi-IN, speaker=advait
+  // Our voice IDs are formatted as 'model:version:lang:gender'
+  const voiceParts = config.voice.split(':');
+  const modelId =
+    voiceParts.length >= 2 ? `${voiceParts[0]}:${voiceParts[1]}` : 'bulbul:v3';
+  const targetLanguageCode =
+    voiceParts.length >= 3 ? voiceParts[2] : 'hi-IN';
+  const gender = voiceParts.length >= 4 ? voiceParts[3] : 'male';
+
+  const speaker = gender === 'female' ? 'shreya' : 'advait';
+
+  // bulbul:v3 uses 0.5 to 2.0, bulbul:v2 uses 0.3 to 3.0
+  const speed = config.speed || 1.0;
+
+  const response = await fetch(`${baseUrl}/text-to-speech`, {
+    method: 'POST',
+    headers: {
+      'api-subscription-key': config.apiKey!,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      inputs: [processedText],
+      target_language_code: targetLanguageCode,
+      speaker: speaker,
+      model: modelId,
+      speech_rate: speed,
+      enable_preprocessing: true,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => response.statusText);
+    throw new Error(`Sarvam TTS API error: ${errorText}`);
+  }
+
+  const data = await response.json();
+
+  // Sarvam API returns { audios: [ "base64_string" ] }
+  if (!data.audios || !Array.isArray(data.audios) || data.audios.length === 0) {
+    throw new Error(
+      `Sarvam TTS error: No audio data in response. Response: ${JSON.stringify(data)}`,
+    );
+  }
+
+  const base64Audio = data.audios[0];
+  const audioBuffer = Buffer.from(base64Audio, 'base64');
+
+  return {
+    audio: new Uint8Array(audioBuffer),
+    format: 'wav', // Sarvam returns WAV by default
+  };
 }
 
 /**

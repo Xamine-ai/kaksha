@@ -122,7 +122,7 @@ ${requirement}
 Requirements:
 - Decide the appropriate number of agents based on the course content (typically 3-5)
 - Exactly 1 agent must have role "teacher", the rest can be "assistant" or "student"
-- Each agent needs: name, role, persona (2-3 sentences describing personality and teaching/learning style)
+- Each agent needs: name, role, gender ("male" | "female"), persona (2-3 sentences describing personality and teaching/learning style)
 - Names and personas must be in language: ${language}
 
 Return a JSON object with this exact structure:
@@ -131,6 +131,7 @@ Return a JSON object with this exact structure:
     {
       "name": "string",
       "role": "teacher" | "assistant" | "student",
+      "gender": "male" | "female",
       "persona": "string (2-3 sentences)"
     }
   ]
@@ -139,7 +140,7 @@ Return a JSON object with this exact structure:
   const response = await aiCall(systemPrompt, userPrompt);
   const rawText = stripCodeFences(response);
   const parsed = JSON.parse(rawText) as {
-    agents: Array<{ name: string; role: string; persona: string }>;
+    agents: Array<{ name: string; role: string; gender: 'male' | 'female'; persona: string }>;
   };
 
   if (!parsed.agents || !Array.isArray(parsed.agents) || parsed.agents.length < 2) {
@@ -155,6 +156,7 @@ Return a JSON object with this exact structure:
     id: `gen-server-${i}`,
     name: a.name,
     role: a.role,
+    gender: a.gender,
     persona: a.persona,
   }));
 }
@@ -392,7 +394,7 @@ export async function generateClassroom(
     });
 
     try {
-      await generateTTSForClassroom(scenes, stageId, options.baseUrl);
+      await generateTTSForClassroom(scenes, stageId, options.baseUrl, agents);
       log.info('TTS generation complete');
     } catch (err) {
       log.warn('TTS generation phase failed, continuing:', err);
