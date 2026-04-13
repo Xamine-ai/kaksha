@@ -62,6 +62,7 @@ interface FormState {
   requirement: string;
   language: Locale;
   webSearch: boolean;
+  aspectRatio: '16:9' | '9:16';
 }
 
 const initialFormState: FormState = {
@@ -69,6 +70,7 @@ const initialFormState: FormState = {
   requirement: '',
   language: 'en-US',
   webSearch: false,
+  aspectRatio: '16:9',
 };
 
 function HomePage() {
@@ -101,15 +103,19 @@ function HomePage() {
       /* localStorage unavailable */
     }
     try {
-      const savedWebSearch = localStorage.getItem(WEB_SEARCH_STORAGE_KEY);
       const savedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
+      const savedAspectRatio = localStorage.getItem('generationAspectRatio');
       const updates: Partial<FormState> = {};
+      const savedWebSearch = localStorage.getItem(WEB_SEARCH_STORAGE_KEY);
       if (savedWebSearch === 'true') updates.webSearch = true;
       if (savedLanguage) {
         updates.language = savedLanguage as Locale;
       } else {
         const detected = (navigator.language?.startsWith('zh') ? 'zh-CN' : 'en-US') as Locale;
         updates.language = detected;
+      }
+      if (savedAspectRatio) {
+        updates.aspectRatio = savedAspectRatio as '16:9' | '9:16';
       }
       if (Object.keys(updates).length > 0) {
         setForm((prev) => ({ ...prev, ...updates }));
@@ -224,6 +230,7 @@ function HomePage() {
     try {
       if (field === 'webSearch') localStorage.setItem(WEB_SEARCH_STORAGE_KEY, String(value));
       if (field === 'language') localStorage.setItem(LANGUAGE_STORAGE_KEY, String(value));
+      if (field === 'aspectRatio') localStorage.setItem('generationAspectRatio', String(value));
       if (field === 'requirement') updateRequirementCache(value as string);
     } catch {
       /* ignore */
@@ -287,6 +294,7 @@ function HomePage() {
         userNickname: userProfile.nickname || undefined,
         userBio: userProfile.bio || undefined,
         webSearch: form.webSearch || undefined,
+        aspectRatio: form.aspectRatio,
       };
 
       let pdfStorageKey: string | undefined;
@@ -625,6 +633,8 @@ function HomePage() {
                   pdfFile={form.pdfFile}
                   onPdfFileChange={(f) => updateForm('pdfFile', f)}
                   onPdfError={setError}
+                  aspectRatio={form.aspectRatio}
+                  onAspectRatioChange={(r) => updateForm('aspectRatio', r)}
                 />
               </div>
 
@@ -1087,7 +1097,10 @@ function ClassroomCard({
       {/* Thumbnail — large radius, no border, subtle bg */}
       <div
         ref={thumbRef}
-        className="relative w-full aspect-[16/9] rounded-2xl bg-slate-100 dark:bg-slate-800/80 overflow-hidden transition-transform duration-200 group-hover:scale-[1.02]"
+        className={cn(
+          'relative w-full rounded-2xl bg-slate-100 dark:bg-slate-800/80 overflow-hidden transition-transform duration-200 group-hover:scale-[1.02]',
+          classroom.aspectRatio === '9:16' ? 'aspect-[9/16]' : 'aspect-video'
+        )}
       >
         {slide && thumbWidth > 0 ? (
           <ThumbnailSlide

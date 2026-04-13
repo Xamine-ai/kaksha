@@ -67,6 +67,19 @@ export function Canvas(_props: CanvasProps) {
   const elements = useSceneSelector<SlideContent, PPTElement[]>(
     (content) => content.canvas.elements,
   );
+  const viewportRatio = useSceneSelector<SlideContent, number>(
+    (content) => content.canvas.viewportRatio,
+  );
+  const viewportSize = useSceneSelector<SlideContent, number>(
+    (content) => content.canvas.viewportSize,
+  );
+  const setViewportRatio = useCanvasStore.use.setViewportRatio();
+  const setViewportSize = useCanvasStore.use.setViewportSize();
+
+  useEffect(() => {
+    setViewportRatio(viewportRatio);
+    setViewportSize(viewportSize);
+  }, [viewportRatio, viewportSize, setViewportRatio, setViewportSize]);
 
   // Canvas UI state
   const canvasScale = useCanvasStore.use.canvasScale();

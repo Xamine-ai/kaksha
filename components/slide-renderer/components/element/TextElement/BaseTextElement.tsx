@@ -3,6 +3,7 @@
 import type { PPTTextElement } from '@/lib/types/slides';
 import { useElementShadow } from '../hooks/useElementShadow';
 import { ElementOutline } from '../ElementOutline';
+import { SafeHTMLWithMath } from '../SafeHTMLWithMath';
 
 export interface BaseTextElementProps {
   elementInfo: PPTTextElement;
@@ -54,8 +55,9 @@ export function BaseTextElement({ elementInfo, target }: BaseTextElementProps) {
           />
           <div
             className={`text ProseMirror-static relative ${target === 'thumbnail' ? 'pointer-events-none' : ''}`}
-            dangerouslySetInnerHTML={{ __html: elementInfo.content }}
-          />
+          >
+            <SafeHTMLWithMath html={elementInfo.content} />
+          </div>
         </div>
       </div>
     </div>

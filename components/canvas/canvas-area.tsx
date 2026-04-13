@@ -4,6 +4,7 @@ import { useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useStageStore } from '@/lib/store';
 import { SceneRenderer } from '@/components/stage/scene-renderer';
 import { SceneProvider } from '@/lib/contexts/scene-context';
 import { Whiteboard } from '@/components/whiteboard';
@@ -45,6 +46,9 @@ export function CanvasArea({
   onRetryGeneration,
 }: CanvasAreaProps) {
   const { t } = useI18n();
+  const stage = useStageStore((s) => s.stage);
+  const aspectRatio = stage?.aspectRatio || '16:9';
+
   const showControls = mode === 'playback' && !whiteboardOpen;
   const showPlayHint =
     showControls &&
@@ -90,12 +94,19 @@ export function CanvasArea({
       >
         <div
           className={cn(
-            'aspect-[16/9] h-full max-h-full max-w-full bg-white dark:bg-gray-800 shadow-2xl rounded-lg overflow-hidden relative transition-all duration-700',
+            'bg-white dark:bg-gray-800 shadow-2xl rounded-lg overflow-hidden relative transition-all duration-700',
             showControls && !isLiveSession && currentScene?.type === 'slide' && 'cursor-pointer',
             currentScene?.type === 'interactive'
               ? 'shadow-blue-200/50 dark:shadow-blue-900/50 ring-1 ring-blue-900/5 dark:ring-blue-500/10'
               : 'shadow-gray-200/50 dark:shadow-gray-800/50 ring-1 ring-gray-950/5 dark:ring-white/5',
           )}
+          style={{
+            aspectRatio: aspectRatio === '9:16' ? '9 / 16' : '16 / 9',
+            width: aspectRatio === '9:16' ? 'auto' : '100%',
+            height: aspectRatio === '9:16' ? '100%' : 'auto',
+            maxWidth: '100%',
+            maxHeight: '100%',
+          }}
           onClick={handleSlideClick}
         >
           {/* Whiteboard Layer */}

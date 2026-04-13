@@ -11,24 +11,30 @@ import type { PercentageGeometry } from '@/lib/types/action';
 export function getElementPercentageGeometry(
   element: PPTElement,
   viewportSize: number = 1000,
+  viewportRatio: number = 0.5625, // Fallback to 16:9
 ): PercentageGeometry | null {
+  // Resolve layout based on ratio (Portrait if ratio > 1)
+  const isPortrait = viewportRatio > 1;
+  const layout = isPortrait ? element.portrait : element.landscape;
+  const pos = layout || element;
+
   // Only positioned elements have left/top/width/height
   if (
-    !('left' in element) ||
-    !('top' in element) ||
-    !('width' in element) ||
-    !('height' in element)
+    pos.left === undefined ||
+    pos.top === undefined ||
+    pos.width === undefined ||
+    (pos as any).height === undefined
   ) {
     return null;
   }
 
-  const { left, top, width, height } = element;
+  const { left, top, width, height } = pos;
 
-  // Calculate percentage coordinates (relative to viewportSize)
+  // Calculate percentage coordinates
   const x = (left / viewportSize) * 100;
-  const y = (top / (viewportSize * 0.5625)) * 100; // 16:9 ratio
+  const y = (top / (viewportSize * viewportRatio)) * 100;
   const w = (width / viewportSize) * 100;
-  const h = (height / (viewportSize * 0.5625)) * 100;
+  const h = ((height as number) / (viewportSize * viewportRatio)) * 100;
 
   // Calculate center point
   const centerX = x + w / 2;
@@ -57,6 +63,7 @@ export function findElementGeometry(
   scene: Record<string, any>,
   elementId: string,
   viewportSize: number = 1000,
+  viewportRatio: number = 0.5625,
 ): PercentageGeometry | null {
   // Support two scene structures:
   // 1. scene.elements (old format)
@@ -82,7 +89,7 @@ export function findElementGeometry(
     return null;
   }
 
-  return getElementPercentageGeometry(element, viewportSize);
+  return getElementPercentageGeometry(element, viewportSize, viewportRatio);
 }
 
 /**

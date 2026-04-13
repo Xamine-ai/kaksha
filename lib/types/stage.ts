@@ -21,6 +21,7 @@ export interface Stage {
   // Stage metadata
   language?: string;
   style?: string;
+  aspectRatio?: '16:9' | '9:16';
   // Whiteboard data
   whiteboard?: Whiteboard[];
 }

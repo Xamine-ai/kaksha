@@ -12,6 +12,7 @@ import { BaseLatexElement } from '../components/element/LatexElement/BaseLatexEl
 import { BaseTableElement } from '../components/element/TableElement/BaseTableElement';
 import { BaseVideoElement } from '../components/element/VideoElement/BaseVideoElement';
 import { useSceneSelector } from '@/lib/contexts/scene-context';
+import { useCanvasStore } from '@/lib/store';
 import type { SceneContent } from '@/lib/types/stage';
 
 interface ScreenElementProps {
@@ -20,7 +21,20 @@ interface ScreenElementProps {
   readonly animate?: boolean;
 }
 
-export function ScreenElement({ elementInfo, elementIndex, animate }: ScreenElementProps) {
+export function ScreenElement({ elementInfo: originalElement, elementIndex, animate }: ScreenElementProps) {
+  // Resolve adaptive layout based on current canvas geometry
+  const viewportRatio = useCanvasStore.use.viewportRatio();
+  const isPortrait = viewportRatio > 1;
+
+  const elementInfo = useMemo(() => {
+    const layout = isPortrait ? originalElement.portrait : originalElement.landscape;
+    if (!layout) return originalElement;
+    return {
+      ...originalElement,
+      ...layout,
+    };
+  }, [originalElement, isPortrait]);
+
   const CurrentElementComponent = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- element components have varying prop signatures
     const elementTypeMap: Record<string, any> = {

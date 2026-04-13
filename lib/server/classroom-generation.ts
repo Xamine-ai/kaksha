@@ -40,6 +40,7 @@ export interface GenerateClassroomInput {
   enableVideoGeneration?: boolean;
   enableTTS?: boolean;
   agentMode?: 'default' | 'generate';
+  aspectRatio?: '16:9' | '9:16';
 }
 
 export type ClassroomGenerationStep =
@@ -206,9 +207,9 @@ export async function generateClassroom(
   };
 
   const lang = normalizeLanguage(input.language);
-  const requirements: UserRequirements = {
     requirement,
     language: lang,
+    aspectRatio: input.aspectRatio,
   };
   const pdfText = pdfContent?.text || undefined;
 
@@ -300,6 +301,7 @@ export async function generateClassroom(
     description: undefined,
     language: lang,
     style: 'interactive',
+    aspectRatio: input.aspectRatio || '16:9',
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
@@ -375,7 +377,7 @@ export async function generateClassroom(
     });
 
     try {
-      const mediaMap = await generateMediaForClassroom(outlines, stageId, options.baseUrl);
+      const mediaMap = await generateMediaForClassroom(outlines, stageId, options.baseUrl, input.aspectRatio);
       replaceMediaPlaceholders(scenes, mediaMap);
       log.info(`Media generation complete: ${Object.keys(mediaMap).length} files`);
     } catch (err) {

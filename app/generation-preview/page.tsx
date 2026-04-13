@@ -369,6 +369,7 @@ function GenerationPreviewContent() {
         description: '',
         language: currentSession.requirements.language || 'zh-CN',
         style: 'professional',
+        aspectRatio: currentSession.requirements.aspectRatio,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };

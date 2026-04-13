@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useMemo } from 'react';
-import { Bot, Check, ChevronLeft, Globe, Paperclip, FileText, X, Globe2 } from 'lucide-react';
+import { Bot, Check, ChevronLeft, Globe, Paperclip, FileText, X, Globe2, Monitor, Smartphone } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import {
   Select,
@@ -39,6 +39,9 @@ export interface GenerationToolbarProps {
   pdfFile: File | null;
   onPdfFileChange: (file: File | null) => void;
   onPdfError: (error: string | null) => void;
+  // Aspect Ratio
+  aspectRatio?: '16:9' | '9:16';
+  onAspectRatioChange?: (ratio: '16:9' | '9:16') => void;
 }
 
 // ─── Component ───────────────────────────────────────────────
@@ -51,6 +54,8 @@ export function GenerationToolbar({
   pdfFile,
   onPdfFileChange,
   onPdfError,
+  aspectRatio = '16:9',
+  onAspectRatioChange,
 }: GenerationToolbarProps) {
   const { t } = useI18n();
   const currentProviderId = useSettingsStore((s) => s.providerId);
@@ -378,6 +383,44 @@ export function GenerationToolbar({
               {name}
             </SelectItem>
           ))}
+        </SelectContent>
+      </Select>
+
+      {/* ── Aspect Ratio selector ── */}
+      <Select
+        value={aspectRatio}
+        onValueChange={(v) => onAspectRatioChange?.(v as '16:9' | '9:16')}
+      >
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <SelectTrigger
+              className={cn(pillMuted, 'h-9 px-3 gap-2 border-border/40 focus:ring-0 shadow-none')}
+            >
+              {aspectRatio === '16:9' ? (
+                <Monitor className="size-3.5 text-muted-foreground" />
+              ) : (
+                <Smartphone className="size-3.5 text-muted-foreground" />
+              )}
+              <SelectValue>
+                <span>{aspectRatio === '16:9' ? '16:9' : '9:16'}</span>
+              </SelectValue>
+            </SelectTrigger>
+          </TooltipTrigger>
+          <TooltipContent>Target Design Focus (Still supports both)</TooltipContent>
+        </Tooltip>
+        <SelectContent>
+          <SelectItem value="16:9">
+            <div className="flex items-center gap-2">
+              <Monitor className="size-3.5" />
+              <span>Laptop First (16:9)</span>
+            </div>
+          </SelectItem>
+          <SelectItem value="9:16">
+            <div className="flex items-center gap-2">
+              <Smartphone className="size-3.5" />
+              <span>Mobile First (9:16)</span>
+            </div>
+          </SelectItem>
         </SelectContent>
       </Select>
 

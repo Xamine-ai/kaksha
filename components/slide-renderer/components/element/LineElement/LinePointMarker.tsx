@@ -23,17 +23,17 @@ const rotateMap: Record<string, number> = {
 export function LinePointMarker({ id, position, type, baseSize, color }: LinePointMarkerProps) {
   const path = pathMap[type];
   const rotate = rotateMap[`${type}-${position}`] || 0;
-  const size = baseSize < 2 ? 2 : baseSize;
+  const size = !baseSize || isNaN(baseSize) || baseSize < 2 ? 2 : baseSize;
 
   return (
     <marker
       id={`${id}-${type}-${position}`}
       markerUnits="userSpaceOnUse"
       orient="auto"
-      markerWidth={size * 3}
-      markerHeight={size * 3}
-      refX={size * 1.5}
-      refY={size * 1.5}
+      markerWidth={String(size * 3)}
+      markerHeight={String(size * 3)}
+      refX={String(size * 1.5)}
+      refY={String(size * 1.5)}
     >
       <path
         d={path}

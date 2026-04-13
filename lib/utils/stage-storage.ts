@@ -27,6 +27,7 @@ export interface StageListItem {
   name: string;
   description?: string;
   sceneCount: number;
+  aspectRatio?: '16:9' | '9:16';
   createdAt: number;
   updatedAt: number;
 }
@@ -47,6 +48,7 @@ export async function saveStageData(stageId: string, data: StageStoreData): Prom
       updatedAt: now,
       language: data.stage.language,
       style: data.stage.style,
+      aspectRatio: data.stage.aspectRatio,
       currentSceneId: data.currentSceneId || undefined,
     });
 
@@ -158,6 +160,7 @@ export async function listStages(): Promise<StageListItem[]> {
           name: stage.name,
           description: stage.description,
           sceneCount,
+          aspectRatio: stage.aspectRatio,
           createdAt: stage.createdAt,
           updatedAt: stage.updatedAt,
         };

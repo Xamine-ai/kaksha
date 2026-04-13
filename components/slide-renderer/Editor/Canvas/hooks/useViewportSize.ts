@@ -21,27 +21,40 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
   const setCanvasScale = useCanvasStore.use.setCanvasScale();
   const setCanvasDragged = useCanvasStore.use.setCanvasDragged();
 
+  const setViewportRatio = useCanvasStore.use.setViewportRatio();
+  const setViewportSize = useCanvasStore.use.setViewportSize();
   const viewportRatio = useCanvasStore.use.viewportRatio();
   const viewportSize = useCanvasStore.use.viewportSize();
 
-  // Initialize viewport position
+  // Initialize viewport position with adaptive logic
   const initViewportPosition = useCallback(() => {
     if (!canvasRef.current) return;
     const canvasWidth = canvasRef.current.clientWidth;
     const canvasHeight = canvasRef.current.clientHeight;
+    
+    // Determine the "True" aspect ratio of the PHYSICAL container
+    const physicalRatio = canvasHeight / canvasWidth;
 
-    if (canvasHeight / canvasWidth > viewportRatio) {
+    // Decide which layout mode to use based on the current screen
+    const targetRatio = physicalRatio > 1.2 ? 16 / 9 : 9 / 16; // Note: In this project, ratio is H/W
+    const targetWidth = targetRatio > 1 ? 562.5 : 1000;
+    
+    // Update store so elements know to switch their layout
+    setViewportRatio(targetRatio);
+    setViewportSize(targetWidth);
+
+    if (physicalRatio > targetRatio) {
       const viewportActualWidth = canvasWidth * (canvasPercentage / 100);
-      setCanvasScale(viewportActualWidth / viewportSize);
+      setCanvasScale(viewportActualWidth / targetWidth);
       setViewportLeft((canvasWidth - viewportActualWidth) / 2);
-      setViewportTop((canvasHeight - viewportActualWidth * viewportRatio) / 2);
+      setViewportTop((canvasHeight - viewportActualWidth * targetRatio) / 2);
     } else {
       const viewportActualHeight = canvasHeight * (canvasPercentage / 100);
-      setCanvasScale(viewportActualHeight / (viewportSize * viewportRatio));
-      setViewportLeft((canvasWidth - viewportActualHeight / viewportRatio) / 2);
+      setCanvasScale(viewportActualHeight / (targetWidth * targetRatio));
+      setViewportLeft((canvasWidth - viewportActualHeight / targetRatio) / 2);
       setViewportTop((canvasHeight - viewportActualHeight) / 2);
     }
-  }, [canvasRef, canvasPercentage, viewportRatio, viewportSize, setCanvasScale]);
+  }, [canvasRef, canvasPercentage, setViewportRatio, setViewportSize, setCanvasScale]);
 
   // Update viewport position
   const setViewportPosition = useCallback(
@@ -49,30 +62,34 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
       if (!canvasRef.current) return;
       const canvasWidth = canvasRef.current.clientWidth;
       const canvasHeight = canvasRef.current.clientHeight;
+      
+      const physicalRatio = canvasHeight / canvasWidth;
+      const targetRatio = physicalRatio > 1.2 ? 16 / 9 : 9 / 16;
+      const targetWidth = targetRatio > 1 ? 562.5 : 1000;
 
-      if (canvasHeight / canvasWidth > viewportRatio) {
+      if (physicalRatio > targetRatio) {
         const newViewportActualWidth = canvasWidth * (newValue / 100);
         const oldViewportActualWidth = canvasWidth * (oldValue / 100);
-        const newViewportActualHeight = newViewportActualWidth * viewportRatio;
-        const oldViewportActualHeight = oldViewportActualWidth * viewportRatio;
+        const newViewportActualHeight = newViewportActualWidth * targetRatio;
+        const oldViewportActualHeight = oldViewportActualWidth * targetRatio;
 
-        setCanvasScale(newViewportActualWidth / viewportSize);
+        setCanvasScale(newViewportActualWidth / targetWidth);
 
         setViewportLeft((prev) => prev - (newViewportActualWidth - oldViewportActualWidth) / 2);
         setViewportTop((prev) => prev - (newViewportActualHeight - oldViewportActualHeight) / 2);
       } else {
         const newViewportActualHeight = canvasHeight * (newValue / 100);
         const oldViewportActualHeight = canvasHeight * (oldValue / 100);
-        const newViewportActualWidth = newViewportActualHeight / viewportRatio;
-        const oldViewportActualWidth = oldViewportActualHeight / viewportRatio;
+        const newViewportActualWidth = newViewportActualHeight / targetRatio;
+        const oldViewportActualWidth = oldViewportActualHeight / targetRatio;
 
-        setCanvasScale(newViewportActualHeight / (viewportSize * viewportRatio));
+        setCanvasScale(newViewportActualHeight / (targetWidth * targetRatio));
 
         setViewportLeft((prev) => prev - (newViewportActualWidth - oldViewportActualWidth) / 2);
         setViewportTop((prev) => prev - (newViewportActualHeight - oldViewportActualHeight) / 2);
       }
     },
-    [canvasRef, viewportRatio, viewportSize, setCanvasScale],
+    [canvasRef, setCanvasScale],
   );
 
   // Track previous Canvas percentage for detecting changes

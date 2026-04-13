@@ -20,7 +20,20 @@ interface ThumbnailElementProps {
  *
  * Renders the corresponding Base component based on element type
  */
-export function ThumbnailElement({ elementInfo, elementIndex }: ThumbnailElementProps) {
+export function ThumbnailElement({
+  elementInfo: originalElement,
+  elementIndex,
+}: ThumbnailElementProps) {
+  const elementInfo = useMemo(() => {
+    // Thumbnails are predominantly landscape (16:9), so we prefer landscape layout.
+    const layout = originalElement.landscape || originalElement.portrait;
+    if (!layout) return originalElement;
+    return {
+      ...originalElement,
+      ...layout,
+    };
+  }, [originalElement]);
+
   const CurrentElementComponent = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- element components have varying prop signatures
     const elementTypeMap: Record<string, any> = {

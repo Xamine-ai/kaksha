@@ -33,6 +33,15 @@ Based on the user's free-form requirement text, automatically infer course detai
 
 ---
 
+## Aspect Ratio Design Rules
+
+The course is being generated for a specific aspect ratio: **{{aspectRatio}}**.
+
+- **16:9 (Landscape)**: Standard desktop/tablet view. You can use side-by-side layouts, multiple columns, and horizontal flowcharts.
+- **9:16 (Portrait)**: Mobile-first view. **Strictly use vertically stacked layouts.** Avoid multi-column layouts or wide side-by-side elements. Ensure key information is centered or stacked. This influences your `keyPoints` description (e.g., instead of "Compare A and B side-by-side", use "Compare A and B sequentially").
+
+---
+
 ## Default Assumption Rules
 
 When user requirements don't specify, use these defaults:
@@ -90,7 +99,7 @@ When comparing or listing information, specify in keyPoints:
 When a slide scene needs an image or video but no suitable PDF image exists, mark it for AI generation:
 
 - Add a `mediaGenerations` array to the scene outline
-- Each entry specifies: `type` ("image" or "video"), `prompt` (description for the generation model), `elementId` (unique placeholder), and optionally `aspectRatio` (default "16:9") and `style`
+- Each entry specifies: `type` ("image" or "video"), `prompt` (description for the generation model), `elementId` (unique placeholder), and `aspectRatio` (MUST match the course aspect ratio: "**{{aspectRatio}}**") and `style`
 - **Image IDs**: use `"gen_img_1"`, `"gen_img_2"`, etc. — IDs are **globally unique across the entire course**, NOT reset per scene
 - **Video IDs**: use `"gen_vid_1"`, `"gen_vid_2"`, etc. — same global numbering rule
 - The prompt should describe the desired media clearly and specifically

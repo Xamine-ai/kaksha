@@ -71,8 +71,12 @@ function convertLatexDelimiters(html: string): string {
  * Falls back to appending at end if </head> is not found.
  */
 function injectKatex(html: string): string {
-  const katexInjection = `
+const katexInjection = `
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<style>
+    .katex-display { overflow-x: auto; overflow-y: hidden; }
+    .katex { font-size: 1.1em; }
+</style>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
 <script>
@@ -89,31 +93,27 @@ document.addEventListener("DOMContentLoaded", function() {
         trust: true
     };
 
-    let renderTimeout;
     function safeRender() {
-        if (renderTimeout) clearTimeout(renderTimeout);
-        renderTimeout = setTimeout(() => {
+        try {
             renderMathInElement(document.body, katexOptions);
-        }, 100);
+        } catch (e) {
+            console.warn("KaTeX render error:", e);
+        }
     }
 
-    renderMathInElement(document.body, katexOptions);
+    // Initial render
+    safeRender();
 
+    // Observe dynamic changes
     const observer = new MutationObserver((mutations) => {
         let shouldRender = false;
-        mutations.forEach((mutation) => {
-            if (mutation.target &&
-                mutation.target.className &&
-                typeof mutation.target.className === 'string' &&
-                mutation.target.className.includes('katex')) {
-                return;
+        for (const mutation of mutations) {
+            if (mutation.type === 'childList' || mutation.type === 'characterData') {
+                shouldRender = true;
+                break;
             }
-            shouldRender = true;
-        });
-
-        if (shouldRender) {
-            safeRender();
         }
+        if (shouldRender) safeRender();
     });
 
     observer.observe(document.body, {
@@ -122,12 +122,15 @@ document.addEventListener("DOMContentLoaded", function() {
         characterData: true
     });
 
+    // Aggressive polling for any missed content (especially helpful for slow-loading JS frameworks)
+    let lastContent = "";
     setInterval(() => {
-        const text = document.body.innerText;
-        if (text.includes('\\\\(') || text.includes('$$')) {
+        const currentContent = document.body.innerHTML;
+        if (currentContent !== lastContent && (currentContent.includes('\\\\(') || currentContent.includes('$'))) {
+            lastContent = currentContent;
             safeRender();
         }
-    }, 2000);
+    }, 1000);
 });
 </script>`;
 

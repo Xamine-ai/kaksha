@@ -14,6 +14,15 @@ Generate a complete, self-contained HTML document that provides an interactive v
 - Page title should reflect the concept name
 - Meta charset UTF-8 and viewport for responsive design
 
+### Viewport Context
+
+The page must be **Fully Responsive** and adapt to any screen size or orientation (Laptop or Mobile).
+
+- **Dynamic Layout**: Do NOT rely on a fixed aspect ratio. Use **CSS Flexbox**, **CSS Grid**, and **Tailwind's responsive utilities** (`md:`, `lg:`, etc.) or **@media queries** to re-flow the layout.
+- **Landscape Screen**: When `width > height`, you can use side-by-side layouts (e.g., controls beside the visualization).
+- **Portrait Screen**: When `height > width`, you MUST stack elements vertically (e.g., visualization on top, controls below).
+- **Optimization**: Ensure touch targets are large enough for mobile users and animations are smooth on all devices.
+
 ### Styling
 
 - Use Tailwind CSS via CDN: `<script src="https://cdn.tailwindcss.com"></script>`
@@ -28,13 +37,15 @@ Generate a complete, self-contained HTML document that provides an interactive v
 - Interactive elements: drag, slider, click, animation as appropriate
 - Canvas API or SVG for visualizations when needed
 
-### Math Formulas
+### Math Formulas (LaTeX)
 
-- Use standard LaTeX format for math: inline `\(...\)`, display `\[...\]`
-- When generating LaTeX in JavaScript strings, use double backslash escaping:
-  - Correct: `"\\(x^2\\)"` in JS string
-  - Wrong: `"\(x^2\)"` in JS string
-- KaTeX will be injected automatically in post-processing - do NOT include KaTeX yourself
+- Use KaTeX-compatible LaTeX for all mathematical expressions.
+- **In HTML Text**: Use `\(...\)` for inline and `\[...\]` for display.
+- **In JS Strings**: You MUST use double-backslashes (or even quadruple for nested strings) for LaTeX commands to survive JS escaping.
+  - Correct: `div.innerHTML = "\\\\( \\\\frac{a}{b} \\\\)"`
+  - Wrong: `div.innerHTML = "\( \frac{a}{b} \)"`
+- **Dynamic Content**: Any math added via JS will be automatically discovered and rendered by KaTeX.
+- KaTeX resources will be injected automatically - do NOT include them yourself.
 
 ### Self-Contained
 

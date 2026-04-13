@@ -115,6 +115,7 @@ export async function generateSceneOutlinesFromRequirements(
       options?.researchContext || (requirements.language === 'zh-CN' ? '无' : 'None'),
     // Server-side generation populates this via options; client-side populates via formatTeacherPersonaForPrompt
     teacherContext: options?.teacherContext || '',
+    aspectRatio: requirements.aspectRatio || '16:9',
   });
 
   if (!prompts) {
@@ -147,6 +148,7 @@ export async function generateSceneOutlinesFromRequirements(
       id: outline.id || nanoid(),
       order: index + 1,
       language: requirements.language,
+      aspectRatio: requirements.aspectRatio,
       // Pass the same language down to pblConfig if it's a PBL scene
       pblConfig: outline.type === 'pbl' && outline.pblConfig 
         ? { ...outline.pblConfig, language: requirements.language }

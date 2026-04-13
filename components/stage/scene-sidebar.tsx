@@ -204,7 +204,12 @@ export function SceneSidebar({
                 </div>
 
                 {/* Thumbnail */}
-                <div className="relative aspect-video w-full rounded overflow-hidden bg-gray-100 dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/5">
+                <div 
+                  className={cn(
+                    'relative w-full rounded overflow-hidden bg-gray-100 dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/5',
+                    viewportRatio > 1 ? 'aspect-[9/16]' : 'aspect-video'
+                  )}
+                >
                   <div className="absolute inset-0 flex items-center justify-center">
                     {isSlide && slideContent ? (
                       <ThumbnailSlide

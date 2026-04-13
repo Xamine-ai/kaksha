@@ -46,6 +46,7 @@ export interface StageRecord {
   updatedAt: number; // timestamp
   language?: string;
   style?: string;
+  aspectRatio?: '16:9' | '9:16';
   currentSceneId?: string;
 }
 
@@ -174,7 +175,7 @@ export function mediaFileKey(stageId: string, elementId: string): string {
 // ==================== Database Definition ====================
 
 const DATABASE_NAME = 'MAIC-Database';
-const _DATABASE_VERSION = 8;
+const _DATABASE_VERSION = 9;
 
 /**
  * MAIC Database Instance
@@ -297,6 +298,20 @@ class MAICDatabase extends Dexie {
 
     // Version 8: Add generatedAgents table for AI-generated agent profiles
     this.version(8).stores({
+      stages: 'id, updatedAt',
+      scenes: 'id, stageId, order, [stageId+order]',
+      audioFiles: 'id, createdAt',
+      imageFiles: 'id, createdAt',
+      snapshots: '++id',
+      chatSessions: 'id, stageId, [stageId+createdAt]',
+      playbackState: 'stageId',
+      stageOutlines: 'stageId',
+      mediaFiles: 'id, stageId, [stageId+type]',
+      generatedAgents: 'id, stageId',
+    });
+    
+    // Version 9: Add aspectRatio to stages table
+    this.version(9).stores({
       stages: 'id, updatedAt',
       scenes: 'id, stageId, order, [stageId+order]',
       audioFiles: 'id, createdAt',

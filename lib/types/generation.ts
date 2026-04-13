@@ -69,6 +69,7 @@ export interface UserRequirements {
   userNickname?: string; // Student nickname for personalization
   userBio?: string; // Student background for personalization
   webSearch?: boolean; // Enable web search for richer context
+  aspectRatio?: '16:9' | '9:16'; // Global aspect ratio for the lecture
 }
 
 /**
@@ -102,6 +103,7 @@ export interface SceneOutline {
   estimatedDuration?: number; // seconds
   order: number;
   language?: Locale; // Generation language (inherited from requirements)
+  aspectRatio?: '16:9' | '9:16';
   // Suggested image IDs (from PDF-extracted images)
   suggestedImageIds?: string[]; // e.g., ["img_1", "img_3"]
   // AI-generated media requests (when PDF images are insufficient)

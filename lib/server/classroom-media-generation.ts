@@ -72,6 +72,7 @@ export async function generateMediaForClassroom(
   outlines: SceneOutline[],
   classroomId: string,
   baseUrl: string,
+  defaultAspectRatio: '16:9' | '9:16' = '16:9',
 ): Promise<Record<string, string>> {
   const mediaDir = path.join(CLASSROOMS_DIR, classroomId, 'media');
   await ensureDir(mediaDir);
@@ -105,7 +106,7 @@ export async function generateMediaForClassroom(
 
         const result = await generateImage(
           { providerId, apiKey, baseUrl: resolveImageBaseUrl(providerId), model },
-          { prompt: req.prompt, aspectRatio: req.aspectRatio || '16:9' },
+          { prompt: req.prompt, aspectRatio: req.aspectRatio || defaultAspectRatio },
         );
 
         let buf: Buffer;
@@ -146,7 +147,7 @@ export async function generateMediaForClassroom(
 
         const normalized = normalizeVideoOptions(providerId, {
           prompt: req.prompt,
-          aspectRatio: (req.aspectRatio as '16:9' | '4:3' | '1:1' | '9:16') || '16:9',
+          aspectRatio: (req.aspectRatio as any) || defaultAspectRatio,
         });
 
         const result = await generateVideo(

@@ -297,6 +297,21 @@ function resolveImageIds(
         }
       }
 
+      // Ensure landscape/portrait layout objects have all required fields (left, top, width, height)
+      // If AI only provided some fields, fill the rest from the top-level element.
+      el.landscape = {
+        left: el.landscape?.left ?? el.left ?? 0,
+        top: el.landscape?.top ?? el.top ?? 0,
+        width: el.landscape?.width ?? el.width ?? 100,
+        height: (el.landscape?.height ?? el.height ?? 100) as number,
+      };
+      el.portrait = {
+        left: el.portrait?.left ?? el.left ?? 0,
+        top: el.portrait?.top ?? el.top ?? 0,
+        width: el.portrait?.width ?? el.width ?? 100,
+        height: (el.portrait?.height ?? el.height ?? 100) as number,
+      };
+
       return el;
     })
     .filter((el): el is NonNullable<typeof el> => el !== null);
@@ -315,6 +330,12 @@ function fixElementDefaults(
     if (el.type === 'line') {
       const lineEl = el as Record<string, unknown>;
 
+      // Ensure basic geometry existence
+      if (el.left === undefined) el.left = 0;
+      if (el.top === undefined) el.top = 0;
+      if (el.width === undefined) el.width = el.type === 'line' ? 3 : 100;
+      if ((el as any).height === undefined) (el as any).height = 100;
+
       // Ensure points field exists with default values
       if (!lineEl.points || !Array.isArray(lineEl.points) || lineEl.points.length !== 2) {
         log.warn(`Line element missing points, adding defaults`);
@@ -323,10 +344,10 @@ function fixElementDefaults(
 
       // Ensure start/end exist
       if (!lineEl.start || !Array.isArray(lineEl.start)) {
-        lineEl.start = [el.left ?? 0, el.top ?? 0];
+        lineEl.start = [0, 0];
       }
       if (!lineEl.end || !Array.isArray(lineEl.end)) {
-        lineEl.end = [(el.left ?? 0) + (el.width ?? 100), (el.top ?? 0) + (el.height ?? 0)];
+        lineEl.end = [el.width ?? 100, 0];
       }
 
       // Ensure style exists
@@ -535,8 +556,9 @@ async function generateSlideContent(
   }
 
   // Canvas dimensions (matching viewportSize and viewportRatio)
-  const canvasWidth = 1000;
-  const canvasHeight = 562.5;
+  const isPortrait = outline.aspectRatio === '9:16';
+  const canvasWidth = isPortrait ? 562.5 : 1000;
+  const canvasHeight = isPortrait ? 1000 : 562.5;
 
   const teacherContext = formatTeacherPersonaForPrompt(agents);
 
@@ -548,6 +570,7 @@ async function generateSlideContent(
     assignedImages: assignedImagesText,
     canvas_width: canvasWidth,
     canvas_height: canvasHeight,
+    aspectRatio: outline.aspectRatio || '16:9',
     teacherContext,
   });
 
@@ -651,6 +674,7 @@ async function generateQuizContent(
     questionCount: quizConfig.questionCount,
     difficulty: quizConfig.difficulty,
     questionTypes: quizConfig.questionTypes.join(', '),
+    aspectRatio: outline.aspectRatio || '16:9',
   });
 
   if (!prompts) {
@@ -797,6 +821,9 @@ async function generateInteractiveContent(
     keyPoints: (outline.keyPoints || []).map((p, i) => `${i + 1}. ${p}`).join('\n'),
     scientificConstraints,
     designIdea: config.designIdea,
+    aspectRatio: outline.aspectRatio || '16:9',
+    canvas_width: outline.aspectRatio === '9:16' ? 562.5 : 1000,
+    canvas_height: outline.aspectRatio === '9:16' ? 1000 : 562.5,
     language,
   });
 
@@ -1230,8 +1257,8 @@ export function createSceneWithActions(
 
     const slide: Slide = {
       id: nanoid(),
-      viewportSize: 1000,
-      viewportRatio: 0.5625,
+      viewportSize: outline.aspectRatio === '9:16' ? 562.5 : 1000,
+      viewportRatio: outline.aspectRatio === '9:16' ? 1.7777777777777777 : 0.5625,
       theme: defaultTheme,
       elements: content.elements,
       background: content.background,

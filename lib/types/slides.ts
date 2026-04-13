@@ -130,10 +130,25 @@ interface PPTBaseElement {
   id: string;
   left: number;
   top: number;
-  lock?: boolean;
-  groupId?: string;
   width: number;
   height: number;
+  
+  // Adaptive layouts
+  landscape?: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  };
+  portrait?: {
+    left: number;
+    top: number;
+    width: number;
+    height: number;
+  };
+
+  lock?: boolean;
+  groupId?: string;
   rotate: number;
   link?: PPTElementLink;
   name?: string;

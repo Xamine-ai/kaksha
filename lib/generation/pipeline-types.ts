@@ -38,6 +38,18 @@ export interface GeneratedSlideData {
     top: number;
     width: number;
     height: number;
+    landscape?: {
+      left: number;
+      top: number;
+      width: number;
+      height: number;
+    };
+    portrait?: {
+      left: number;
+      top: number;
+      width: number;
+      height: number;
+    };
     [key: string]: unknown;
   }>;
   background?: {

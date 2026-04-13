@@ -7,6 +7,7 @@ import { useElementFlip } from '../hooks/useElementFlip';
 import { useElementFill } from '../hooks/useElementFill';
 import { GradientDefs } from './GradientDefs';
 import { PatternDefs } from './PatternDefs';
+import { SafeHTMLWithMath } from '../SafeHTMLWithMath';
 
 export interface BaseShapeElementProps {
   elementInfo: PPTShapeElement;
@@ -102,13 +103,13 @@ export function BaseShapeElement({ elementInfo }: BaseShapeElementProps) {
               letterSpacing: `${text.wordSpace || 0}px`,
             }}
           >
-            <div
+            <SafeHTMLWithMath
               className="ProseMirror-static [&_p]:mb-[var(--paragraphSpace)]"
+              // @ts-ignore - CSS custom properties in style
               style={{
-                // @ts-expect-error CSS custom properties
                 '--paragraphSpace': `${text.paragraphSpace === undefined ? 5 : text.paragraphSpace}px`,
               }}
-              dangerouslySetInnerHTML={{ __html: text.content }}
+              html={text.content}
             />
           </div>
         </div>

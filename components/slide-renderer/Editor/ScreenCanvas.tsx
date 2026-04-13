@@ -12,14 +12,17 @@ import type { SlideContent } from '@/lib/types/stage';
 import type { PPTElement, SlideBackground } from '@/lib/types/slides';
 import type { PercentageGeometry } from '@/lib/types/action';
 import { useViewportSize } from './Canvas/hooks/useViewportSize';
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
 
 export function ScreenCanvas() {
+  const viewportRatio = useCanvasStore.use.viewportRatio();
+  const viewportSize = useCanvasStore.use.viewportSize();
   const canvasScale = useCanvasStore.use.canvasScale();
   const elements = useSceneSelector<SlideContent, PPTElement[]>(
     (content) => content.canvas.elements,
   );
+
   const canvasRef = useRef<HTMLDivElement>(null);
 
   // Viewport size and positioning
@@ -44,8 +47,10 @@ export function ScreenCanvas() {
     return findElementGeometry(
       { type: 'slide', content: { canvas: { elements } } } as Record<string, unknown>,
       laserElementId,
+      viewportSize,
+      viewportRatio,
     );
-  }, [laserElementId, elements]);
+  }, [laserElementId, elements, viewportSize, viewportRatio]);
 
   // Compute zoom target geometry
   const zoomGeometry = useMemo<PercentageGeometry | null>(() => {
@@ -55,8 +60,10 @@ export function ScreenCanvas() {
     return findElementGeometry(
       { type: 'slide', content: { canvas: { elements } } } as Record<string, unknown>,
       zoomTarget.elementId,
+      viewportSize,
+      viewportRatio,
     );
-  }, [zoomTarget, elements]);
+  }, [zoomTarget, elements, viewportSize, viewportRatio]);
 
   return (
     <div className="relative h-full w-full overflow-hidden select-none" ref={canvasRef}>
