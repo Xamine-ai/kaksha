@@ -13,6 +13,9 @@ import {
   RefreshCw,
   Square,
   Play,
+  Monitor,
+  Smartphone,
+  RotateCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { ThumbnailSlide } from '@/components/slide-renderer/components/ThumbnailSlide';
@@ -516,6 +519,49 @@ export function SceneSidebar({
               </div>
             </div>
           )}
+
+        {/* Orientation Toggle (Testing) */}
+        {!collapsed && (
+          <div className="mx-3 mb-4 p-1.5 rounded-xl bg-gray-100/50 dark:bg-gray-800/40 border border-gray-200/50 dark:border-gray-700/30 flex items-center justify-between gap-1">
+            <button
+              onClick={() => useCanvasStore.getState().setOrientationMode('auto')}
+              className={cn(
+                'flex-1 h-8 rounded-lg flex items-center justify-center gap-1.5 transition-all',
+                useCanvasStore.use.orientationMode() === 'auto'
+                  ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400 shadow-sm'
+                  : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+              )}
+              title="Auto-Responsive"
+            >
+              <RotateCw className="w-3.5 h-3.5" />
+              <span className="text-[10px] font-bold">Auto</span>
+            </button>
+            <button
+              onClick={() => useCanvasStore.getState().setOrientationMode('landscape')}
+              className={cn(
+                'flex-1 h-8 rounded-lg flex items-center justify-center gap-1.5 transition-all',
+                useCanvasStore.use.orientationMode() === 'landscape'
+                  ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400 shadow-sm'
+                  : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+              )}
+              title="Force Landscape (16:9)"
+            >
+              <Monitor className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={() => useCanvasStore.getState().setOrientationMode('portrait')}
+              className={cn(
+                'flex-1 h-8 rounded-lg flex items-center justify-center gap-1.5 transition-all',
+                useCanvasStore.use.orientationMode() === 'portrait'
+                  ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400 shadow-sm'
+                  : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+              )}
+              title="Force Portrait (9:16)"
+            >
+              <Smartphone className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* Spacer to push content */}
         <div className="mt-auto" />

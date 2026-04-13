@@ -25,6 +25,7 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
   const setViewportSize = useCanvasStore.use.setViewportSize();
   const viewportRatio = useCanvasStore.use.viewportRatio();
   const viewportSize = useCanvasStore.use.viewportSize();
+  const orientationMode = useCanvasStore.use.orientationMode();
 
   // Initialize viewport position with adaptive logic
   const initViewportPosition = useCallback(() => {
@@ -35,8 +36,11 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
     // Determine the "True" aspect ratio of the PHYSICAL container
     const physicalRatio = canvasHeight / canvasWidth;
 
-    // Decide which layout mode to use based on the current screen
-    const targetRatio = physicalRatio > 1.2 ? 16 / 9 : 9 / 16; // Note: In this project, ratio is H/W
+    // Decide which layout mode to use (Automatic or Manual Override)
+    let targetRatio = physicalRatio > 1.2 ? 16 / 9 : 9 / 16;
+    if (orientationMode === 'landscape') targetRatio = 9 / 16;
+    if (orientationMode === 'portrait') targetRatio = 16 / 9;
+
     const targetWidth = targetRatio > 1 ? 562.5 : 1000;
     
     // Update store so elements know to switch their layout
@@ -54,7 +58,7 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
       setViewportLeft((canvasWidth - viewportActualHeight / targetRatio) / 2);
       setViewportTop((canvasHeight - viewportActualHeight) / 2);
     }
-  }, [canvasRef, canvasPercentage, setViewportRatio, setViewportSize, setCanvasScale]);
+  }, [canvasRef, canvasPercentage, orientationMode, setViewportRatio, setViewportSize, setCanvasScale]);
 
   // Update viewport position
   const setViewportPosition = useCallback(
@@ -64,7 +68,11 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
       const canvasHeight = canvasRef.current.clientHeight;
       
       const physicalRatio = canvasHeight / canvasWidth;
-      const targetRatio = physicalRatio > 1.2 ? 16 / 9 : 9 / 16;
+      
+      let targetRatio = physicalRatio > 1.2 ? 16 / 9 : 9 / 16;
+      if (orientationMode === 'landscape') targetRatio = 9 / 16;
+      if (orientationMode === 'portrait') targetRatio = 16 / 9;
+
       const targetWidth = targetRatio > 1 ? 562.5 : 1000;
 
       if (physicalRatio > targetRatio) {
@@ -89,7 +97,7 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
         setViewportTop((prev) => prev - (newViewportActualHeight - oldViewportActualHeight) / 2);
       }
     },
-    [canvasRef, setCanvasScale],
+    [canvasRef, setCanvasScale, orientationMode],
   );
 
   // Track previous Canvas percentage for detecting changes
@@ -106,7 +114,7 @@ export function useViewportSize(canvasRef: RefObject<HTMLElement | null>) {
   // Reset viewport position when viewport ratio or size changes
   useEffect(() => {
     initViewportPosition();
-  }, [viewportRatio, viewportSize, initViewportPosition]);
+  }, [viewportRatio, viewportSize, orientationMode, initViewportPosition]);
 
   // Reset viewport position when drag state is restored
   useEffect(() => {

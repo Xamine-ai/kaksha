@@ -108,6 +108,7 @@ interface CanvasState {
   editorAreaFocus: boolean; // Whether editor area is focused
   disableHotkeys: boolean; // Whether hotkeys are disabled
   selectedTableCells: string[]; // Selected table cells
+  orientationMode: 'auto' | 'landscape' | 'portrait'; // Orientation override for testing
 
   // ===== Actions =====
 
@@ -161,6 +162,7 @@ interface CanvasState {
   setEditorAreaFocus: (focus: boolean) => void;
   setDisableHotkeysState: (disable: boolean) => void;
   setSelectedTableCells: (cells: string[]) => void;
+  setOrientationMode: (mode: 'auto' | 'landscape' | 'portrait') => void;
 
   // ----- Teaching features -----
   setSpotlight: (elementId: string, options?: SpotlightOptions) => void;
@@ -233,6 +235,7 @@ const initialState = {
   thumbnailsFocus: false,
   disableHotkeys: false,
   selectedTableCells: [],
+  orientationMode: 'auto' as const,
 
   // Teaching features
   spotlightElementId: '',
@@ -350,6 +353,7 @@ const useCanvasStoreBase = create<CanvasState>((set, get) => ({
   setDisableHotkeysState: (disable) => set({ disableHotkeys: disable }),
 
   setSelectedTableCells: (cells) => set({ selectedTableCells: cells }),
+  setOrientationMode: (mode) => set({ orientationMode: mode }),
 
   // ===== Teaching Feature Actions =====
 

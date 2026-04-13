@@ -4,7 +4,7 @@ import { useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Play } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useStageStore } from '@/lib/store';
+import { useStageStore, useCanvasStore } from '@/lib/store';
 import { SceneRenderer } from '@/components/stage/scene-renderer';
 import { SceneProvider } from '@/lib/contexts/scene-context';
 import { Whiteboard } from '@/components/whiteboard';
@@ -47,7 +47,8 @@ export function CanvasArea({
 }: CanvasAreaProps) {
   const { t } = useI18n();
   const stage = useStageStore((s) => s.stage);
-  const aspectRatio = stage?.aspectRatio || '16:9';
+  const viewportRatio = useCanvasStore.use.viewportRatio();
+  const isPortrait = viewportRatio > 1;
 
   const showControls = mode === 'playback' && !whiteboardOpen;
   const showPlayHint =
@@ -101,9 +102,9 @@ export function CanvasArea({
               : 'shadow-gray-200/50 dark:shadow-gray-800/50 ring-1 ring-gray-950/5 dark:ring-white/5',
           )}
           style={{
-            aspectRatio: aspectRatio === '9:16' ? '9 / 16' : '16 / 9',
-            width: aspectRatio === '9:16' ? 'auto' : '100%',
-            height: aspectRatio === '9:16' ? '100%' : 'auto',
+            aspectRatio: isPortrait ? '9 / 16' : '16 / 9',
+            width: isPortrait ? 'auto' : '100%',
+            height: isPortrait ? '100%' : 'auto',
             maxWidth: '100%',
             maxHeight: '100%',
           }}
