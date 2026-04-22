@@ -59,6 +59,7 @@ export function SceneSidebar({
   const failedOutlines = useStageStore.use.failedOutlines();
   const viewportSize = useCanvasStore.use.viewportSize();
   const viewportRatio = useCanvasStore.use.viewportRatio();
+  const orientationMode = useCanvasStore.use.orientationMode();
 
   const [retryingOutlineId, setRetryingOutlineId] = useState<string | null>(null);
 
@@ -159,7 +160,6 @@ export function SceneSidebar({
         <div className="flex-1 overflow-y-auto overflow-x-hidden p-2 space-y-2 scrollbar-hide pt-1">
           {scenes.map((scene, index) => {
             const isActive = currentSceneId === scene.id;
-            const Icon = getSceneTypeIcon(scene.type);
             const isSlide = scene.type === 'slide';
             const slideContent = isSlide ? (scene.content as SlideContent) : null;
 
@@ -208,19 +208,14 @@ export function SceneSidebar({
 
                 {/* Thumbnail */}
                 <div 
-                  className={cn(
-                    'relative w-full rounded overflow-hidden bg-gray-100 dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/5',
-                    (isSlide && slideContent?.canvas?.viewportRatio ? slideContent.canvas.viewportRatio > 1 : viewportRatio > 1) 
-                      ? 'aspect-[9/16]' 
-                      : 'aspect-video'
-                  )}
+                  className="relative w-full aspect-video rounded overflow-hidden bg-gray-100 dark:bg-gray-800 ring-1 ring-black/5 dark:ring-white/5"
                 >
                   <div className="absolute inset-0 flex items-center justify-center">
                     {isSlide && slideContent ? (
                       <ThumbnailSlide
                         slide={slideContent.canvas}
-                        viewportSize={viewportSize}
-                        viewportRatio={viewportRatio}
+                        viewportSize={slideContent.canvas.viewportSize ?? 1000}
+                        viewportRatio={0.5625}
                         size={Math.max(100, sidebarWidth - 28)}
                       />
                     ) : scene.type === 'quiz' ? (
@@ -529,7 +524,7 @@ export function SceneSidebar({
               onClick={() => useCanvasStore.getState().setOrientationMode('auto')}
               className={cn(
                 'flex-1 h-8 rounded-lg flex items-center justify-center gap-1.5 transition-all',
-                useCanvasStore.use.orientationMode() === 'auto'
+                orientationMode === 'auto'
                   ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400 shadow-sm'
                   : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
               )}
@@ -542,7 +537,7 @@ export function SceneSidebar({
               onClick={() => useCanvasStore.getState().setOrientationMode('landscape')}
               className={cn(
                 'flex-1 h-8 rounded-lg flex items-center justify-center gap-1.5 transition-all',
-                useCanvasStore.use.orientationMode() === 'landscape'
+                orientationMode === 'landscape'
                   ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400 shadow-sm'
                   : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
               )}
@@ -554,7 +549,7 @@ export function SceneSidebar({
               onClick={() => useCanvasStore.getState().setOrientationMode('portrait')}
               className={cn(
                 'flex-1 h-8 rounded-lg flex items-center justify-center gap-1.5 transition-all',
-                useCanvasStore.use.orientationMode() === 'portrait'
+                orientationMode === 'portrait'
                   ? 'bg-white dark:bg-gray-700 text-purple-600 dark:text-purple-400 shadow-sm'
                   : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
               )}

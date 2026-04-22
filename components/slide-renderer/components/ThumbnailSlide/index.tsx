@@ -72,7 +72,12 @@ export function ThumbnailSlide({
 
         {/* Render all elements */}
         {slide.elements.map((element, index) => (
-          <ThumbnailElement key={element.id} elementInfo={element} elementIndex={index + 1} />
+          <ThumbnailElement
+            key={element.id}
+            elementInfo={element}
+            elementIndex={index + 1}
+            isPortrait={viewportRatio > 1}
+          />
         ))}
       </div>
     </div>

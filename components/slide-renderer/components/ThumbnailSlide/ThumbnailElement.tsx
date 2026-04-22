@@ -13,6 +13,7 @@ import { BaseVideoElement } from '../element/VideoElement/BaseVideoElement';
 interface ThumbnailElementProps {
   readonly elementInfo: PPTElement;
   readonly elementIndex: number;
+  readonly isPortrait?: boolean;
 }
 
 /**
@@ -23,16 +24,17 @@ interface ThumbnailElementProps {
 export function ThumbnailElement({
   elementInfo: originalElement,
   elementIndex,
+  isPortrait,
 }: ThumbnailElementProps) {
   const elementInfo = useMemo(() => {
-    // Thumbnails are predominantly landscape (16:9), so we prefer landscape layout.
-    const layout = originalElement.landscape || originalElement.portrait;
+    // Select adaptive layout based on the thumbnail's intended shape
+    const layout = isPortrait ? originalElement.portrait : originalElement.landscape;
     if (!layout) return originalElement;
     return {
       ...originalElement,
       ...layout,
     };
-  }, [originalElement]);
+  }, [originalElement, isPortrait]);
 
   const CurrentElementComponent = useMemo(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- element components have varying prop signatures

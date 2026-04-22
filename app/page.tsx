@@ -1098,8 +1098,7 @@ function ClassroomCard({
       <div
         ref={thumbRef}
         className={cn(
-          'relative w-full rounded-2xl bg-slate-100 dark:bg-slate-800/80 overflow-hidden transition-transform duration-200 group-hover:scale-[1.02]',
-          classroom.aspectRatio === '9:16' ? 'aspect-[9/16]' : 'aspect-video'
+          'relative w-full rounded-2xl bg-slate-100 dark:bg-slate-800/80 overflow-hidden transition-transform duration-200 group-hover:scale-[1.02] aspect-video',
         )}
       >
         {slide && thumbWidth > 0 ? (
@@ -1107,7 +1106,7 @@ function ClassroomCard({
             slide={slide}
             size={thumbWidth}
             viewportSize={slide.viewportSize ?? 1000}
-            viewportRatio={slide.viewportRatio || (classroom.aspectRatio === '9:16' ? 1.7777 : 0.5625)}
+            viewportRatio={0.5625}
           />
         ) : !slide ? (
           <div className="absolute inset-0 flex items-center justify-center">
