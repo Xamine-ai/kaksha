@@ -482,8 +482,11 @@ export function WhiteboardCanvas() {
     };
   }, []);
 
-  const canvasWidth = 1000;
-  const canvasHeight = 562.5;
+  const viewportRatio = useCanvasStore.use.viewportRatio();
+  const isPortrait = viewportRatio > 1;
+
+  const canvasWidth = isPortrait ? 562.5 : 1000;
+  const canvasHeight = isPortrait ? 1000 : 562.5;
   const padding = 24;
 
   const updateContainerScale = useCallback(() => {

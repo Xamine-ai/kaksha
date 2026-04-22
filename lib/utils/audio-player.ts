@@ -87,13 +87,20 @@ export class AudioPlayer {
 
       // Set ended callback
       this.audio.addEventListener('ended', () => {
-        if (isBlob && srcUrl) URL.revokeObjectURL(srcUrl);
+        // We avoid revoking immediately to allow for replay/seeking
+        // The URL will be cleaned up by the browser when the element is GC'd
+        // or when this.stop() is called for a new track.
         this.onEndedCallback?.();
       });
 
       // Handle load errors
       this.audio.addEventListener('error', (e) => {
-        log.error(`Failed to load audio from ${srcUrl}:`, e);
+        const error = (e.target as HTMLAudioElement).error;
+        log.error(`Failed to load audio from ${srcUrl}:`, {
+          code: error?.code,
+          message: error?.message,
+          event: e
+        });
       });
 
       // Play

@@ -1107,7 +1107,7 @@ function ClassroomCard({
             slide={slide}
             size={thumbWidth}
             viewportSize={slide.viewportSize ?? 1000}
-            viewportRatio={slide.viewportRatio ?? 0.5625}
+            viewportRatio={slide.viewportRatio || (classroom.aspectRatio === '9:16' ? 1.7777 : 0.5625)}
           />
         ) : !slide ? (
           <div className="absolute inset-0 flex items-center justify-center">
