@@ -136,6 +136,7 @@ export async function generateAndStoreTTS(
     body: JSON.stringify({
       text,
       audioId,
+      classroomId: useStageStore.getState().stage?.id, // Send classroomId if available
       ttsProviderId: settings.ttsProviderId,
       ttsVoice: settings.ttsVoice,
       ttsSpeed: settings.ttsSpeed,

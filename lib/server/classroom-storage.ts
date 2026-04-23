@@ -6,6 +6,8 @@ import type { Scene, Stage } from '@/lib/types/stage';
 export const CLASSROOMS_DIR = path.join(process.cwd(), 'data', 'classrooms');
 export const CLASSROOM_JOBS_DIR = path.join(process.cwd(), 'data', 'classroom-jobs');
 
+console.log('[ClassroomStorage] CLASSROOMS_DIR:', CLASSROOMS_DIR);
+
 async function ensureDir(dir: string) {
   await fs.mkdir(dir, { recursive: true });
 }

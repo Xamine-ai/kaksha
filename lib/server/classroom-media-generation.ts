@@ -211,6 +211,7 @@ export async function generateTTSForClassroom(
   baseUrl: string,
   agents?: AgentInfo[],
 ): Promise<void> {
+  log.info(`[generateTTSForClassroom] START: classroomId=${classroomId}, scenes=${scenes.length}`);
   const audioDir = path.join(CLASSROOMS_DIR, classroomId, 'audio');
   await ensureDir(audioDir);
 
@@ -238,13 +239,16 @@ export async function generateTTSForClassroom(
   // Mapping voices based on provider and gender
   let voice = DEFAULT_TTS_VOICES[providerId] || 'default';
   if (providerId === 'sarvam-tts') {
-    // Pick male (advait) or female (shreya) for Sarvam TTS based on teacher gender
-    voice = gender === 'female' ? 'bulbul:v2:hi-IN:female' : 'bulbul:v2:hi-IN:male';
+    // Pick male (abhilash) or female (vidya) for Sarvam TTS based on teacher gender
+    voice = gender === 'female' ? 'bulbul:v3:hi-IN:female' : 'bulbul:v3:hi-IN:male';
   } else if (providerId === 'openai-tts') {
     voice = gender === 'female' ? 'nova' : 'alloy';
   }
 
-  const format = TTS_PROVIDERS[providerId]?.supportedFormats?.[0] || 'mp3';
+  const supportedFormats = TTS_PROVIDERS[providerId]?.supportedFormats || ['mp3'];
+  const format = supportedFormats[0];
+
+  log.info(`[ClassroomMedia] Using format "${format}" for provider "${providerId}"`);
 
   for (const scene of scenes) {
     if (!scene.actions) continue;
@@ -256,6 +260,14 @@ export async function generateTTSForClassroom(
       if (action.type !== 'speech' || !(action as SpeechAction).text) continue;
       const speechAction = action as SpeechAction;
       const audioId = `tts_${action.id}`;
+
+      // SKIP if already has a valid URL (not a placeholder)
+      if (speechAction.audioUrl && 
+          !isMediaPlaceholder(speechAction.audioUrl) && 
+          (speechAction.audioUrl.startsWith('http') || speechAction.audioUrl.startsWith('/api/'))) {
+        log.info(`[ClassroomMedia] Skipping generation, audio already exists: ${speechAction.audioUrl}`);
+        continue;
+      }
 
       // Dynamically resolve voice for this speech if text starts with "Name:"
       let currentVoice = voice;
@@ -274,16 +286,39 @@ export async function generateTTSForClassroom(
       }
 
       try {
+        const filename = `${audioId}.${format}`;
+        const fullPath = path.join(audioDir, filename);
+        
+        // Skip if file already exists
+        try {
+          const stats = await fs.stat(fullPath);
+          log.info(`[ClassroomMedia] TTS file already exists, skipping: ${filename} (size: ${stats.size} bytes)`);
+          
+          // Estimate duration for sequencing: WAV 16kHz 16-bit mono is ~32000 bytes/s
+          // This is a fallback if we don't have a real duration
+          const estimatedDuration = (stats.size - 44) / 32000;
+          
+          speechAction.audioId = audioId;
+          speechAction.audioUrl = mediaServingUrl(baseUrl, classroomId, `audio/${filename}`);
+          (speechAction as any).duration = estimatedDuration;
+          continue;
+        } catch (e) {
+          log.info(`[ClassroomMedia] File ${filename} not found, generating...`);
+        }
+
         const result = await generateTTS(
           { providerId, apiKey, baseUrl: ttsBaseUrl, voice: currentVoice, speed: speechAction.speed },
           text,
         );
 
-        const filename = `${audioId}.${format}`;
-        await fs.writeFile(path.join(audioDir, filename), result.audio);
+        await fs.writeFile(fullPath, result.audio);
+
+        // Estimate duration for sequencing
+        const duration = (result.audio.length - 44) / 32000;
 
         speechAction.audioId = audioId;
         speechAction.audioUrl = mediaServingUrl(baseUrl, classroomId, `audio/${filename}`);
+        (speechAction as any).duration = duration;
         log.info(
           `Generated TTS: ${filename} (${result.audio.length} bytes) using voice: ${currentVoice}`,
         );
@@ -291,5 +326,19 @@ export async function generateTTSForClassroom(
         log.warn(`TTS generation failed for action ${action.id}:`, err);
       }
     }
+  }
+
+  // After generating all TTS, calculate total durations for each scene
+  for (const scene of scenes) {
+    let sceneDuration = 0;
+    if (scene.actions) {
+      for (const action of scene.actions) {
+        if (action.type === 'speech' && (action as any).duration) {
+          sceneDuration += (action as any).duration + 0.5; // Include the pause
+        }
+      }
+    }
+    // Minimum 5 seconds, or the calculated duration
+    (scene as any).totalDuration = Math.max(5, sceneDuration);
   }
 }

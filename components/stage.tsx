@@ -41,10 +41,12 @@ export function Stage({
   onRetryOutline,
   onStopGeneration,
   onResumeGeneration,
+  onExportVideo,
 }: {
   onRetryOutline?: (outlineId: string) => Promise<void>;
   onStopGeneration?: () => void;
   onResumeGeneration?: () => void;
+  onExportVideo?: (aspectRatio: '16:9' | '9:16') => Promise<any>;
 }) {
   const { t } = useI18n();
   const { mode, getCurrentScene, scenes, currentSceneId, setCurrentSceneId, generatingOutlines } =
@@ -694,6 +696,7 @@ export function Stage({
         onRetryOutline={onRetryOutline}
         onStopGeneration={onStopGeneration}
         onResumeGeneration={onResumeGeneration}
+        onExportVideo={onExportVideo}
       />
 
       {/* Main Content Area */}

@@ -7,6 +7,8 @@
  * POST /api/generate/tts
  */
 
+import { promises as fs } from 'fs';
+import path from 'path';
 import { NextRequest } from 'next/server';
 import { generateTTS } from '@/lib/audio/tts-providers';
 import { resolveTTSApiKey, resolveTTSBaseUrl } from '@/lib/server/provider-config';
@@ -14,6 +16,7 @@ import type { TTSProviderId } from '@/lib/audio/types';
 import { createLogger } from '@/lib/logger';
 import { apiError, apiSuccess } from '@/lib/server/api-response';
 import { validateUrlForSSRF } from '@/lib/server/ssrf-guard';
+import { CLASSROOMS_DIR } from '@/lib/server/classroom-storage';
 
 const log = createLogger('TTS API');
 
@@ -76,6 +79,21 @@ export async function POST(req: NextRequest) {
 
     // Generate audio
     const { audio, format } = await generateTTS(config, text);
+
+    // If classroomId is provided, save to disk for reuse in video rendering
+    const { classroomId } = body as { classroomId?: string };
+    if (classroomId) {
+      try {
+        const audioDir = path.join(CLASSROOMS_DIR, classroomId, 'audio');
+        await fs.mkdir(audioDir, { recursive: true });
+        const filePath = path.join(audioDir, `${audioId}.${format}`);
+        await fs.writeFile(filePath, Buffer.from(audio));
+        log.info(`Saved TTS to disk for classroom ${classroomId}: ${audioId}.${format}`);
+      } catch (saveErr) {
+        log.warn(`Failed to save TTS to disk for classroom ${classroomId}:`, saveErr);
+        // Continue anyway as we still have the audio in memory to return
+      }
+    }
 
     // Convert to base64
     const base64 = Buffer.from(audio).toString('base64');

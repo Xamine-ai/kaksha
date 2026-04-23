@@ -31,6 +31,7 @@ interface SceneSidebarProps {
   readonly onRetryOutline?: (outlineId: string) => Promise<void>;
   readonly onStopGeneration?: () => void;
   readonly onResumeGeneration?: () => void;
+  readonly onExportVideo?: (aspectRatio: '16:9' | '9:16') => Promise<any>;
 }
 
 const DEFAULT_WIDTH = 220;
@@ -44,9 +45,27 @@ export function SceneSidebar({
   onRetryOutline,
   onStopGeneration,
   onResumeGeneration,
+  onExportVideo,
 }: SceneSidebarProps) {
   const { t } = useI18n();
   const router = useRouter();
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportVideo = async (aspectRatio: '16:9' | '9:16') => {
+    if (!onExportVideo) return;
+    setIsExporting(true);
+    try {
+      const result = await onExportVideo(aspectRatio);
+      if (result.success && result.url) {
+        window.open(result.url, '_blank');
+      }
+    } catch (err) {
+      console.error('[Classroom] Video export failed:', err);
+      alert('Video export failed: ' + (err instanceof Error ? err.message : String(err)));
+    } finally {
+      setIsExporting(false);
+    }
+  };
   const {
     scenes,
     currentSceneId,
@@ -557,6 +576,45 @@ export function SceneSidebar({
             >
               <Smartphone className="w-3.5 h-3.5" />
             </button>
+          </div>
+        )}
+
+        {/* Video Export Buttons */}
+        {!collapsed && scenes.length > 0 && (
+          <div className="mx-3 mb-4 p-3 rounded-xl bg-gradient-to-br from-purple-600 to-indigo-600 dark:from-purple-500 dark:to-indigo-500 shadow-lg shadow-purple-200 dark:shadow-none animate-in fade-in slide-in-from-bottom-3 duration-500">
+            <div className="flex flex-col gap-2">
+              <span className="text-[10px] uppercase tracking-wider font-bold text-white/80">
+                {t('stage.videoExport') || 'Video Export'}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  disabled={isExporting}
+                  onClick={() => handleExportVideo('16:9')}
+                  className="flex-1 h-9 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+                  title="Export Landscape (16:9)"
+                >
+                  {isExporting ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Monitor className="w-3.5 h-3.5" />
+                  )}
+                  <span className="text-xs font-bold">16:9</span>
+                </button>
+                <button
+                  disabled={isExporting}
+                  onClick={() => handleExportVideo('9:16')}
+                  className="flex-1 h-9 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+                  title="Export Portrait (9:16)"
+                >
+                  {isExporting ? (
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Smartphone className="w-3.5 h-3.5" />
+                  )}
+                  <span className="text-xs font-bold">9:16</span>
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

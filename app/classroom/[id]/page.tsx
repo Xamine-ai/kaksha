@@ -156,6 +156,43 @@ export default function ClassroomDetailPage() {
     }
   }, [loading, error, generateRemaining]);
 
+  const handleExportVideo = useCallback(
+    async (aspectRatio: '16:9' | '9:16') => {
+      const { stage, scenes } = useStageStore.getState();
+      if (!stage || !scenes || scenes.length === 0) {
+        throw new Error('No stage or scenes found to export');
+      }
+
+      const response = await fetch('/api/video/render', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          stage,
+          scenes,
+          aspectRatio,
+          classroomId: stage.id,
+        }),
+      });
+
+      if (!response.ok) {
+        let errorMessage = 'Failed to render video';
+        try {
+          const error = await response.json();
+          errorMessage = error.details || error.error || errorMessage;
+        } catch (e) {
+          // If response is not JSON (e.g. HTML error page)
+          errorMessage = `Server error (${response.status}): ${response.statusText}`;
+        }
+        throw new Error(errorMessage);
+      }
+
+      return await response.json();
+    },
+    []
+  );
+
   return (
     <ThemeProvider>
       <MediaStageProvider value={classroomId}>
@@ -187,6 +224,7 @@ export default function ClassroomDetailPage() {
               onRetryOutline={retrySingleOutline}
               onStopGeneration={stop}
               onResumeGeneration={resume}
+              onExportVideo={handleExportVideo}
             />
           )}
         </div>

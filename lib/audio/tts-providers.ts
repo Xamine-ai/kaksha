@@ -167,7 +167,7 @@ async function generateSarvamTTS(
     voiceParts.length >= 3 ? voiceParts[2] : 'hi-IN';
   const gender = voiceParts.length >= 4 ? voiceParts[3] : 'male';
 
-  const speaker = gender === 'female' ? 'shreya' : 'advait';
+  const speaker = gender === 'female' ? 'vidya' : 'abhilash';
 
   // bulbul:v3 uses 0.5 to 2.0, bulbul:v2 uses 0.3 to 3.0
   const speed = config.speed || 1.0;

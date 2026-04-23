@@ -15,6 +15,9 @@
 # testing
 /coverage
 
+#video
+/public/exports
+
 # next.js
 /.next/
 /out/
