@@ -239,8 +239,8 @@ export async function generateTTSForClassroom(
   // Mapping voices based on provider and gender
   let voice = DEFAULT_TTS_VOICES[providerId] || 'default';
   if (providerId === 'sarvam-tts') {
-    // Pick male (abhilash) or female (vidya) for Sarvam TTS based on teacher gender
-    voice = gender === 'female' ? 'bulbul:v3:hi-IN:female' : 'bulbul:v3:hi-IN:male';
+    // Pick male (advait) or female (shreya) for Sarvam TTS based on teacher gender
+    voice = gender === 'female' ? 'bulbul:v2:hi-IN:female' : 'bulbul:v2:hi-IN:male';
   } else if (providerId === 'openai-tts') {
     voice = gender === 'female' ? 'nova' : 'alloy';
   }

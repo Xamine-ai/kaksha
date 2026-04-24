@@ -158,16 +158,15 @@ async function generateSarvamTTS(
     return Number(num).toLocaleString('en-IN');
   });
 
-  // 2. Parse voice ID: bulbul:v3:hi-IN:male -> model=bulbul:v3, target_language_code=hi-IN, speaker=advait
-  // Our voice IDs are formatted as 'model:version:lang:gender'
+  // 2. Parse voice ID: bulbul:v2:hi-IN:male -> model=bulbul:v2, target_language_code=hi-IN, speaker=advait
   const voiceParts = config.voice.split(':');
   const modelId =
-    voiceParts.length >= 2 ? `${voiceParts[0]}:${voiceParts[1]}` : 'bulbul:v3';
+    voiceParts.length >= 2 ? `${voiceParts[0]}:${voiceParts[1]}` : 'bulbul:v2';
   const targetLanguageCode =
     voiceParts.length >= 3 ? voiceParts[2] : 'hi-IN';
   const gender = voiceParts.length >= 4 ? voiceParts[3] : 'male';
 
-  const speaker = gender === 'female' ? 'vidya' : 'abhilash';
+  const speaker = gender === 'female' ? 'shreya' : 'advait';
 
   // bulbul:v3 uses 0.5 to 2.0, bulbul:v2 uses 0.3 to 3.0
   const speed = config.speed || 1.0;
